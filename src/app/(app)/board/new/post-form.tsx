@@ -15,7 +15,7 @@ const FIELDS = [
 export function PostForm() {
   const [state, action, pending] = useActionState(createPost, undefined);
   return (
-    <form action={action} className="mt-8 flex flex-col gap-5">
+    <form action={action} className="mt-8 flex flex-col gap-5 rounded-2xl border border-line bg-white p-5 shadow-clay sm:p-6">
       <label className="flex flex-col gap-1 text-sm font-bold">
         증상을 한 줄로
         <input
@@ -34,7 +34,7 @@ export function PostForm() {
         </label>
       ))}
       {state?.error && (
-        <p role="alert" className="rounded-sm bg-danger-soft px-3 py-2 text-sm text-danger">
+        <p key={state.error} role="alert" className="animate-shake rounded-xl bg-danger-soft px-3.5 py-2.5 text-sm text-danger">
           {state.error}
         </p>
       )}

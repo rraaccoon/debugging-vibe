@@ -7,7 +7,7 @@ import { BUTTON, INPUT } from "@/components/ui";
 export function SetupForm() {
   const [state, action, pending] = useActionState(setupAccount, undefined);
   return (
-    <form action={action} className="mt-8 flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm font-bold">
         닉네임
         <span className="font-normal text-ink-muted">로그인할 때 쓰고, 게시판에 이 이름으로 보여요</span>
@@ -28,11 +28,11 @@ export function SetupForm() {
         <input type="password" name="confirm" required minLength={6} autoComplete="new-password" className={INPUT} />
       </label>
       {state?.error && (
-        <p role="alert" className="rounded-sm bg-danger-soft px-3 py-2 text-sm text-danger">
+        <p key={state.error} role="alert" className="animate-shake rounded-xl bg-danger-soft px-3.5 py-2.5 text-sm text-danger">
           {state.error}
         </p>
       )}
-      <button type="submit" disabled={pending} className={BUTTON}>
+      <button type="submit" disabled={pending} className={`${BUTTON} mt-1`}>
         {pending ? "만드는 중" : "계정 만들기"}
       </button>
     </form>

@@ -1,60 +1,40 @@
+import Link from "next/link";
+import { ViewTransition } from "react";
 import { CATEGORIES, GUIDES } from "@/content/guides";
-import { CopyButton } from "@/components/copy-button";
+import { PageTransition } from "@/components/page-transition";
+import { stagger } from "@/components/ui";
 
-const slug = (s: string) => s.replace(/\s+/g, "-");
-
-export default function GuidePage() {
+export default function HomePage() {
   return (
-    <>
-      <h1 className="text-2xl font-bold">막혔을 때, 증상부터 찾으세요</h1>
-      <p className="mt-2 max-w-prose text-ink-muted">
-        항목을 열면 원인, 먼저 확인할 것, 그리고 AI 도구에 붙여넣을 말이 있어요. [대괄호]는 내 상황으로 바꿔서
-        붙이세요.
-      </p>
-      <nav className="mt-6 flex flex-wrap gap-2 text-sm">
-        {CATEGORIES.map((c) => (
-          <a key={c} href={`#${slug(c)}`} className="rounded-sm border border-line bg-white px-3 py-1 hover:border-action">
-            {c}
-          </a>
-        ))}
-      </nav>
-
-      {CATEGORIES.map((category) => {
-        const items = GUIDES.filter((g) => g.category === category);
-        if (items.length === 0) return null;
-        return (
-          <section key={category} id={slug(category)} className="mt-10 scroll-mt-6">
-            <h2 className="text-lg font-bold">{category}</h2>
-            <div className="mt-3 divide-y divide-line border-y border-line">
-              {items.map((g) => (
-                <details key={g.id} className="py-3">
-                  <summary className="font-bold leading-snug">{g.symptom}</summary>
-                  <div className="mt-3 flex flex-col gap-4 pl-5">
-                    <p className="max-w-prose text-ink-muted">{g.cause}</p>
-                    <div>
-                      <h3 className="text-sm font-bold">먼저 확인할 것</h3>
-                      <ul className="mt-1 list-disc pl-5 text-sm">
-                        {g.checkFirst.map((c) => (
-                          <li key={c}>{c}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-bold">AI 도구에 붙여넣기</h3>
-                        <CopyButton text={g.prompt} />
-                      </div>
-                      <pre className="mt-2 whitespace-pre-wrap rounded-md bg-mark px-4 py-3 font-sans text-sm leading-relaxed">
-                        {g.prompt}
-                      </pre>
-                    </div>
-                  </div>
-                </details>
-              ))}
-            </div>
-          </section>
-        );
-      })}
-    </>
+    <PageTransition>
+      <div>
+        <h1 className="animate-reveal font-display text-3xl leading-tight sm:text-4xl">
+          막혔을 때, <span className="marker">증상부터</span> 찾으세요
+        </h1>
+        <p className="mt-3 max-w-prose animate-reveal text-ink-muted [animation-delay:70ms]">
+          지금 겪는 것과 가장 가까운 유형을 고르세요. 안에서 증상을 열면 원인과 AI 도구에 붙여넣을 말이 있어요.
+        </p>
+        <ul className="stagger mt-8 grid gap-3 sm:grid-cols-2">
+          {CATEGORIES.map((c, i) => {
+            const count = GUIDES.filter((g) => g.category === c.title).length;
+            return (
+              <li key={c.slug} style={stagger(2 + i)}>
+                <Link
+                  href={`/guide/${c.slug}`}
+                  transitionTypes={["nav-forward"]}
+                  className="flex h-full flex-col gap-2 rounded-2xl border border-line bg-white p-5 shadow-clay-sm transition-all duration-200 ease-out-expo hover:-translate-y-1 hover:border-action/40 hover:shadow-clay active:translate-y-0 active:scale-[0.98]"
+                >
+                  <ViewTransition name={`cat-${c.slug}`} share="morph" default="none">
+                    <span className="font-display text-xl leading-tight">{c.title}</span>
+                  </ViewTransition>
+                  <span className="text-sm text-ink-muted">{c.blurb}</span>
+                  <span className="mt-auto pt-2 text-sm font-bold text-action">증상 {count}개 보기</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </PageTransition>
   );
 }

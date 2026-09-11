@@ -2,29 +2,155 @@
 
 @theme {
   --color-*: initial;
-  --color-paper: #f6f7f5;
+  --color-paper: #ffffff;
   --color-white: #ffffff;
-  --color-ink: #1f2421;
-  --color-ink-muted: #5f6763;
-  --color-ink-faint: #9aa19c;
-  --color-line: #d9ded9;
-  --color-mark: #fff1a8;
-  --color-mark-deep: #e9cf3a;
-  --color-action: #0f6e56;
-  --color-action-deep: #0b5442;
-  --color-action-soft: #e3f1ec;
+  --color-mist: #f1f6f4;
+  --color-ink: #1e2330;
+  --color-ink-muted: #5b6472;
+  --color-ink-faint: #9aa3ad;
+  --color-line: #e4e6df;
+  --color-mark: #fff0a3;
+  --color-mark-deep: #f2d23a;
+  --color-action: #0f766e;
+  --color-action-deep: #115e59;
+  --color-action-soft: #d8f3ee;
+  --color-siren: #f04e23;
+  --color-siren-deep: #c93a13;
+  --color-siren-soft: #ffe9e1;
   --color-danger: #b42318;
   --color-danger-soft: #fceceb;
 
   --font-*: initial;
   --font-sans: var(--font-noto-sans-kr), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-display: var(--font-noto-sans-kr), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-clay:
+    0 10px 24px -10px rgba(30, 35, 48, 0.22), inset 0 -3px 0 rgba(30, 35, 48, 0.08),
+    inset 0 2px 0 rgba(255, 255, 255, 0.75);
+  --shadow-clay-sm:
+    0 4px 12px -5px rgba(30, 35, 48, 0.18), inset 0 -2px 0 rgba(30, 35, 48, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+
+  --animate-reveal: reveal 500ms var(--ease-out-expo) both;
+  --animate-pop: pop 320ms var(--ease-spring) both;
+  --animate-shake: shake 400ms ease-out both;
+  --animate-ripple: ripple 1100ms ease-out both;
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-action);
-  outline-offset: 2px;
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
+}
+@keyframes ripple {
+  from {
+    opacity: 0.9;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+@keyframes marker {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
 }
 
+@layer base {
+  body {
+    background-image: radial-gradient(70rem 26rem at 50% -8rem, #dff4ec 0%, rgba(223, 244, 236, 0) 65%);
+    background-repeat: no-repeat;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* 첫 화면: 자식 순서대로 올라오며 나타난다 (--i 로 순서) */
+.stagger > * {
+  animation: reveal 500ms var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* 형광펜 한 줄 — 페이지의 유일한 자동 재생 강조 */
+.marker {
+  background: linear-gradient(transparent 52%, var(--color-mark) 52%, var(--color-mark) 92%, transparent 92%) no-repeat 0 0;
+  background-size: 0% 100%;
+  animation: marker 600ms var(--ease-out-expo) 350ms both;
+  padding: 0 0.1em;
+}
+
+/* 체크 항목 취소선이 왼쪽에서 그어진다 */
+.strike {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 58% / 0% 1.5px;
+  transition:
+    background-size 300ms var(--ease-out-expo),
+    color 300ms;
+}
+
+/* details 펼침 애니메이션 (지원 브라우저에서만 · 아니면 즉시 열림) */
+details {
+  interpolate-size: allow-keywords;
+}
+details::details-content {
+  block-size: 0;
+  overflow: clip;
+  opacity: 0;
+  transition:
+    block-size 350ms var(--ease-out-expo),
+    opacity 250ms ease,
+    content-visibility 350ms allow-discrete;
+}
+details[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
 details > summary {
   list-style: none;
   cursor: pointer;
@@ -32,19 +158,106 @@ details > summary {
 details > summary::-webkit-details-marker {
   display: none;
 }
-details > summary::before {
-  content: "+" / "";
-  display: inline-block;
-  width: 1.25rem;
-  color: var(--color-ink-faint);
-  font-weight: 700;
+.disclosure-icon {
+  transition: transform 300ms var(--ease-spring), background-color 200ms;
 }
-details[open] > summary::before {
-  content: "–" / "";
+details[open] .disclosure-icon {
+  transform: rotate(45deg);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  details > summary::before {
-    transition: color 120ms;
+:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: 2px;
+}
+
+/* 화면 전환 (React ViewTransition) */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(.page-out) {
+  animation: 140ms ease-in both vt-fade reverse;
+}
+::view-transition-new(.page-in) {
+  animation:
+    260ms var(--ease-out-expo) 80ms both vt-fade,
+    420ms var(--ease-out-expo) both vt-up;
+}
+::view-transition-old(.nav-forward) {
+  --slide-offset: -40px;
+  animation:
+    140ms ease-in both vt-fade reverse,
+    380ms var(--ease-out-expo) both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 40px;
+  animation:
+    240ms var(--ease-out-expo) 120ms both vt-fade,
+    380ms var(--ease-out-expo) both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 40px;
+  animation:
+    140ms ease-in both vt-fade reverse,
+    380ms var(--ease-out-expo) both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -40px;
+  animation:
+    240ms var(--ease-out-expo) 120ms both vt-fade,
+    380ms var(--ease-out-expo) both vt-slide;
+}
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+::view-transition-group(nav-active) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes vt-up {
+  from {
+    transform: translateY(12px);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after,
+  ::details-content {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }

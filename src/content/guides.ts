@@ -4,9 +4,22 @@
  * 프롬프트 안의 [대괄호]는 학생이 자기 상황으로 바꿔 넣는 자리다.
  */
 
+export const CATEGORIES = [
+  { slug: "build", title: "빌드 실패", blurb: "Vercel 배포가 빨갛게 멈췄을 때" },
+  { slug: "wrong-value", title: "예상과 다른 값", blurb: "화면에 이상한 값이 나오거나 저장한 게 사라질 때" },
+  { slug: "data-flow", title: "데이터 흐름 끊김", blurb: "눌렀는데 아무 일도 없고, 넣었는데 목록에 안 나올 때" },
+  { slug: "db", title: "DB", blurb: "연결 오류가 나거나 테이블이 없다고 할 때" },
+  { slug: "routing", title: "페이지 이동 오류", blurb: "404가 나거나, 저장 뒤에 안 넘어갈 때" },
+  { slug: "ai", title: "AI가 이상하게 굴 때", blurb: "없는 걸 고쳤다고 하거나, 고칠수록 다른 데가 망가질 때" },
+  { slug: "teamwork", title: "파트 나누기", blurb: "둘이 같은 파일을 고쳐서 작업이 사라졌을 때" },
+  { slug: "git", title: "git 합치기", blurb: "push가 거부되거나 CONFLICT가 났을 때" },
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
+
 export type Guide = {
   id: string;
-  category: string;
+  category: Category["title"];
   /** 학생이 말하는 그대로의 증상 */
   symptom: string;
   /** 흔한 원인 — 한두 문장 */
@@ -16,17 +29,6 @@ export type Guide = {
   /** AI 도구에 붙여넣을 말 */
   prompt: string;
 };
-
-export const CATEGORIES = [
-  "빌드 실패",
-  "예상과 다른 값",
-  "데이터 흐름 끊김",
-  "DB",
-  "페이지 이동 오류",
-  "AI가 이상하게 굴 때",
-  "파트 나누기",
-  "git 합치기",
-] as const;
 
 export const GUIDES: Guide[] = [
   {
