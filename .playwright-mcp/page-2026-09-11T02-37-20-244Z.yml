@@ -1,0 +1,9 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "뒤로가기" [ref=e5] [cursor=pointer]
+        - heading "팀 일정 관리" [level=1] [ref=e8]
+      - button "구성원으로 보는 중" [ref=e10] [cursor=pointer]
+    - paragraph [ref=e15]: 예정된 일정이 없습니다
+  - alert [ref=e16]
