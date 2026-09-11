@@ -4,8 +4,9 @@ const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL 환경변수가 없습니다 (.env.local 과 Vercel 에 넣으세요)");
 const sql = neon(url);
 
-export type Role = "instructor" | "student";
-export type User = { id: number; name: string; role: Role };
+/** shared — 학생들이 처음 들어올 때 쓰는 공용 계정. 로그인하면 바로 /setup 으로 보내 자기 계정을 만들게 한다 */
+export type Role = "instructor" | "student" | "shared";
+export type User = { id: number; name: string; realName: string | null; role: Role };
 export type PostFields = {
   title: string;
   whatDoing: string;
@@ -14,9 +15,10 @@ export type PostFields = {
   expected: string;
   actual: string;
 };
-export type PostSummary = { id: number; title: string; author: string; createdAt: string; answerCount: number };
-export type Post = PostFields & { id: number; author: string; authorRole: Role; createdAt: string };
-export type Answer = { id: number; body: string; author: string; authorRole: Role; createdAt: string };
+type Author = { author: string; authorRealName: string | null; authorRole: Role };
+export type PostSummary = Author & { id: number; title: string; createdAt: string; answerCount: number };
+export type Post = PostFields & Author & { id: number; createdAt: string };
+export type Answer = Author & { id: number; body: string; createdAt: string };
 
 let ready: Promise<void> | null = null;
 
@@ -38,6 +40,7 @@ async function createTables(): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS real_name TEXT`;
   await sql`
     CREATE TABLE IF NOT EXISTS posts (
       id SERIAL PRIMARY KEY,
@@ -63,22 +66,33 @@ async function createTables(): Promise<void> {
 }
 
 const iso = (v: unknown) => new Date(v as string).toISOString();
+const toUser = (r: Record<string, unknown>): User => ({
+  id: r.id as number,
+  name: r.name as string,
+  realName: (r.real_name as string | null) ?? null,
+  role: r.role as Role,
+});
+const toAuthor = (r: Record<string, unknown>): Author => ({
+  author: r.author as string,
+  authorRealName: (r.author_real_name as string | null) ?? null,
+  authorRole: r.author_role as Role,
+});
 
 /* ── 계정 ── */
 
 export async function findUserForLogin(name: string): Promise<(User & { passwordHash: string }) | null> {
   await ensureSchema();
-  const [r] = await sql`SELECT id, name, role, password_hash FROM users WHERE name = ${name}`;
-  return r ? { id: r.id, name: r.name, role: r.role, passwordHash: r.password_hash } : null;
+  const [r] = await sql`SELECT id, name, real_name, role, password_hash FROM users WHERE name = ${name}`;
+  return r ? { ...toUser(r), passwordHash: r.password_hash } : null;
 }
 
 export async function getUserById(id: number): Promise<User | null> {
   await ensureSchema();
-  const [r] = await sql`SELECT id, name, role FROM users WHERE id = ${id}`;
-  return r ? { id: r.id, name: r.name, role: r.role } : null;
+  const [r] = await sql`SELECT id, name, real_name, role FROM users WHERE id = ${id}`;
+  return r ? toUser(r) : null;
 }
 
-/** 같은 이름이면 비밀번호·역할을 덮어쓴다 */
+/** 같은 이름이면 비밀번호·역할을 덮어쓴다 (강사 · 공용 계정용) */
 export async function upsertUser(name: string, passwordHash: string, role: Role): Promise<void> {
   await ensureSchema();
   await sql`
@@ -87,20 +101,32 @@ export async function upsertUser(name: string, passwordHash: string, role: Role)
   `;
 }
 
+/** 학생이 /setup 에서 만드는 자기 계정 — name(닉네임)은 유일해야 한다 */
+export async function createStudent(name: string, passwordHash: string, realName: string): Promise<number> {
+  await ensureSchema();
+  const [r] = await sql`
+    INSERT INTO users (name, password_hash, role, real_name)
+    VALUES (${name}, ${passwordHash}, 'student', ${realName})
+    RETURNING id
+  `;
+  return r.id;
+}
+
 /* ── 질문 ── */
 
 export async function listPosts(): Promise<PostSummary[]> {
   await ensureSchema();
   const rows = await sql`
-    SELECT p.id, p.title, u.name AS author, p.created_at,
+    SELECT p.id, p.title, p.created_at,
+      u.name AS author, u.real_name AS author_real_name, u.role AS author_role,
       (SELECT count(*) FROM answers a WHERE a.post_id = p.id)::int AS answer_count
     FROM posts p JOIN users u ON u.id = p.author_id
     ORDER BY p.id DESC
   `;
   return rows.map((r) => ({
+    ...toAuthor(r),
     id: r.id,
     title: r.title,
-    author: r.author,
     createdAt: iso(r.created_at),
     answerCount: r.answer_count,
   }));
@@ -110,19 +136,21 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
   await ensureSchema();
   const [p] = await sql`
     SELECT p.id, p.title, p.what_doing, p.when_happened, p.how_did, p.expected, p.actual, p.created_at,
-      u.name AS author, u.role AS author_role
+      u.name AS author, u.real_name AS author_real_name, u.role AS author_role
     FROM posts p JOIN users u ON u.id = p.author_id
     WHERE p.id = ${id}
   `;
   if (!p) return null;
   const rows = await sql`
-    SELECT a.id, a.body, a.created_at, u.name AS author, u.role AS author_role
+    SELECT a.id, a.body, a.created_at,
+      u.name AS author, u.real_name AS author_real_name, u.role AS author_role
     FROM answers a JOIN users u ON u.id = a.author_id
     WHERE a.post_id = ${id}
     ORDER BY a.id ASC
   `;
   return {
     post: {
+      ...toAuthor(p),
       id: p.id,
       title: p.title,
       whatDoing: p.what_doing,
@@ -130,15 +158,12 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
       howDid: p.how_did,
       expected: p.expected,
       actual: p.actual,
-      author: p.author,
-      authorRole: p.author_role,
       createdAt: iso(p.created_at),
     },
     answers: rows.map((a) => ({
+      ...toAuthor(a),
       id: a.id,
       body: a.body,
-      author: a.author,
-      authorRole: a.author_role,
       createdAt: iso(a.created_at),
     })),
   };

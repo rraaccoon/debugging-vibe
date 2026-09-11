@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getUser } from "@/lib/session";
 import { logout } from "@/lib/actions";
 import { NavLinks } from "@/components/nav-links";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
+  if (user?.role === "shared") redirect("/setup");
   return (
     <>
       <header className="border-b border-line bg-white">

@@ -28,8 +28,10 @@ export const getUser = cache(async (): Promise<User | null> => {
   return id === null ? null : getUserById(id);
 });
 
+/** 로그인 안 했으면 /login, 공용 계정이면 자기 계정을 만들도록 /setup 으로 보낸다 */
 export async function requireUser(): Promise<User> {
   const user = await getUser();
   if (!user) redirect("/login");
+  if (user.role === "shared") redirect("/setup");
   return user;
 }

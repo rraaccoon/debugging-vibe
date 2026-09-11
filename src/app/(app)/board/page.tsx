@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listPosts } from "@/lib/db";
-import { formatDate } from "@/lib/format";
+import { getUser } from "@/lib/session";
+import { authorLabel, formatDate } from "@/lib/format";
 import { BUTTON } from "@/components/ui";
 
 export const metadata: Metadata = { title: "질문 게시판" };
 
 export default async function BoardPage() {
-  const posts = await listPosts();
+  const [posts, viewer] = await Promise.all([listPosts(), getUser()]);
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -33,7 +34,7 @@ export default async function BoardPage() {
                 className="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-3 hover:bg-white"
               >
                 <span className="font-bold">{p.title}</span>
-                <span className="text-sm text-ink-muted">{p.author}</span>
+                <span className="text-sm text-ink-muted">{authorLabel(p, viewer?.role)}</span>
                 <span className="text-sm text-ink-muted">{formatDate(p.createdAt)}</span>
                 <span className={`ml-auto text-sm ${p.answerCount ? "font-bold text-action" : "text-ink-faint"}`}>
                   {p.answerCount ? `답 ${p.answerCount}` : "답 없음"}

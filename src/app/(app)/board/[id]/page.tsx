@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPost } from "@/lib/db";
+import { getUser } from "@/lib/session";
 import { addAnswer } from "@/lib/actions";
-import { formatDate } from "@/lib/format";
+import { authorLabel, formatDate } from "@/lib/format";
 import { BUTTON, INPUT } from "@/components/ui";
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const postId = Number(id);
-  const data = Number.isInteger(postId) ? await getPost(postId) : null;
+  const [data, viewer] = await Promise.all([Number.isInteger(postId) ? getPost(postId) : null, getUser()]);
   if (!data) notFound();
   const { post, answers } = data;
 
@@ -27,8 +28,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       </Link>
       <h1 className="mt-3 text-2xl font-bold">{post.title}</h1>
       <p className="mt-1 text-sm text-ink-muted">
-        {post.author}
-        {post.authorRole === "instructor" && " (강사)"}, {formatDate(post.createdAt)}
+        {authorLabel(post, viewer?.role)}, {formatDate(post.createdAt)}
       </p>
 
       <dl className="mt-6 divide-y divide-line border-y border-line">
@@ -52,8 +52,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
                 className={`rounded-md px-4 py-3 ${a.authorRole === "instructor" ? "bg-action-soft" : "border border-line bg-white"}`}
               >
                 <p className="text-sm font-bold">
-                  {a.author}
-                  {a.authorRole === "instructor" && " (강사)"}{" "}
+                  {authorLabel(a, viewer?.role)}{" "}
                   <span className="font-normal text-ink-muted">{formatDate(a.createdAt)}</span>
                 </p>
                 <p className="mt-1 whitespace-pre-wrap">{a.body}</p>
