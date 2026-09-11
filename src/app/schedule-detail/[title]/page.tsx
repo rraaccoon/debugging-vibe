@@ -1,12 +1,13 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Screen, ScreenHeader } from "@/components/screen";
 import { Badge, NameChip, TextInput, OutlineButton } from "@/components/ui";
-import { getSchedule, getAttendances, saveAttendance, getIsAdmin } from "@/lib/storage";
-import type { Attendance } from "@/lib/storage";
+import { getSchedule, getAttendances, saveAttendance, getMembers } from "@/lib/db";
+import { getIsAdmin } from "@/lib/storage";
+import type { Attendance, Schedule } from "@/lib/storage";
 
 interface PageProps {
   params: Promise<{ title: string }>;
@@ -21,19 +22,51 @@ export default function ScheduleDetailPage({ params }: PageProps) {
   const [name, setName] = useState("");
   const [submitError, setSubmitError] = useState<string>("");
 
-  // 일정 데이터 로드
-  const schedule = getSchedule(decodedTitle);
+  // 일정 · 참석 응답 · 미응답 명단 로드 상태
+  const [schedule, setSchedule] = useState<Schedule | undefined>(undefined);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
+  const [pendingList, setPendingList] = useState<string[]>([]);
+
+  // 총무 판정 (P1 · P4) — 로그인 전 임시 스위치, localStorage 라 동기로 그대로 둔다
+  const isAdmin = getIsAdmin();
+
+  // 일정 · 참석 응답 · 미응답 명단을 함께 읽어 온다(값만 반환 — setState 는 호출부가 한다)
+  const fetchDetail = useCallback(async () => {
+    const found = await getSchedule(decodedTitle);
+    const atts = found ? await getAttendances(decodedTitle) : [];
+
+    // 미응답 명단 계산 (F4 · P1 — 총무만)
+    // [?] 미응답 명단이 총무만 보는지 명시적으로 묻지는 않았으나, F4 "총무가 일정을 열면"으로 해석
+    let pending: string[] = [];
+    if (isAdmin && found) {
+      const memberList = await getMembers();
+      const respondedNames = new Set(atts.map((a) => a.name));
+      pending = memberList.filter((m) => !respondedNames.has(m.name)).map((m) => m.name);
+    }
+
+    return { found, atts, pending };
+  }, [decodedTitle, isAdmin]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchDetail().then(({ found, atts, pending }) => {
+      if (cancelled) return;
+      setSchedule(found);
+      setAttendances(atts);
+      setPendingList(pending);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchDetail]);
 
   // 상태값 판정
   const isUpcoming = schedule?.status === "예정";
   const isStarted = schedule && schedule.status !== "예정";
 
-  // 총무 판정 (P1 · P4)
-  const isAdmin = getIsAdmin();
   const canEdit = isAdmin && isUpcoming;
 
   // 참석 응답 데이터 (F4)
-  const attendances = schedule ? getAttendances(decodedTitle) : [];
   const attendList = attendances
     .filter((a) => a.answer === "참석")
     .map((a) => a.name);
@@ -41,18 +74,8 @@ export default function ScheduleDetailPage({ params }: PageProps) {
     .filter((a) => a.answer === "불참")
     .map((a) => a.name);
 
-  // 미응답 명단 계산 (F4 · P1 — 총무만)
-  // [?] 미응답 명단이 총무만 보는지 명시적으로 묻지는 않았으나, F4 "총무가 일정을 열면"으로 해석
-  const members = globalThis.localStorage?.getItem("team-schedule:members");
-  let pendingList: string[] = [];
-  if (isAdmin && schedule) {
-    const memberList = members ? JSON.parse(members) : [];
-    const respondedNames = new Set(attendances.map((a) => a.name));
-    pendingList = memberList.filter((m: { name: string }) => !respondedNames.has(m.name)).map((m: { name: string }) => m.name);
-  }
-
   // 참석/불참 저장 (F3 · P5)
-  const handleAttendance = (answer: "참석" | "불참") => {
+  const handleAttendance = async (answer: "참석" | "불참") => {
     if (!name.trim()) {
       setSubmitError("이름을 입력하세요");
       return;
@@ -66,11 +89,14 @@ export default function ScheduleDetailPage({ params }: PageProps) {
     };
 
     try {
-      saveAttendance(attendance);
+      await saveAttendance(attendance);
       setName("");
       setSubmitError("");
-      // 페이지 새로고침으로 명단 반영
-      router.refresh();
+      // 명단 다시 불러와 반영
+      const { found, atts, pending } = await fetchDetail();
+      setSchedule(found);
+      setAttendances(atts);
+      setPendingList(pending);
     } catch (error) {
       setSubmitError((error as Error).message || "저장 실패");
     }

@@ -3,9 +3,13 @@
  * 표에 없는 칸은 만들지 않는다. 한도 · 규칙(제목 30자 · 날짜는 오늘 이후 · 참석/불참 중 하나 ·
  * 같은 이름은 하나만)은 저장 전에 검사한다.
  *
- * 저장 위치는 브라우저 localStorage 다(이번 단계의 요청). PRD 5절은 "서버 데이터베이스"로 적혀 있고
- * 07 공통 인수 조건은 "다른 기기 · 다른 사람이 새로고침해도 같은 것"을 요구한다 — localStorage 로는
- * 그 조건을 만족할 수 없다(같은 브라우저 안에서만 남는다).
+ * 이 파일은 타입 · 순수 검사 함수(validateSchedule · validateAttendance · todayString) ·
+ * 총무 전환 스위치(getIsAdmin · setIsAdmin, localStorage)만 담는다 — 클라이언트 컴포넌트에서
+ * 그대로 가져다 써도 안전하다.
+ *
+ * 4개 저장 항목을 읽고 쓰는 실제 구현(서버 데이터베이스, Neon Postgres)은 `./db.ts` 에 있다 —
+ * 그 파일은 "use server" 서버 액션이라 브라우저 번들에 들어가지 않는다. 화면은 DB 함수를
+ * `./db.ts` 에서, 이 파일에서는 타입 · 순수 함수만 가져온다.
  */
 
 export type ScheduleStatus = "예정" | "진행 중" | "지난 일정";
@@ -54,35 +58,8 @@ export type ShareLink = {
   url: string;
 };
 
-const KEY = {
-  schedules: "team-schedule:schedules",
-  attendances: "team-schedule:attendances",
-  members: "team-schedule:members",
-  shareLinks: "team-schedule:share-links",
-} as const;
-
 /** 총무로 보는 중인지 — 로그인 전(모듈2) 임시 전환 스위치. 06 저장 항목이 아니다 */
 const ADMIN_KEY = "currentAdmin";
-
-/* ── localStorage 읽고 쓰기 ── */
-
-/** 서버 렌더 · 저장소 없음 · 깨진 JSON · 배열이 아닌 값 → 빈 배열 */
-function readList<T>(key: string): T[] {
-  try {
-    const raw = globalThis.localStorage?.getItem(key);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as T[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-/** 서버 렌더에서는 아무것도 하지 않는다. 저장소가 꽉 차면 예외는 그대로 올린다(조용히 잃지 않게) */
-function writeList<T>(key: string, list: T[]): void {
-  if (!globalThis.localStorage) return;
-  globalThis.localStorage.setItem(key, JSON.stringify(list));
-}
 
 /* ── 검사 ── */
 
@@ -122,61 +99,9 @@ export function validateAttendance(attendance: Attendance): string | null {
   return null;
 }
 
-function assertValid(reason: string | null): void {
+/** DB 저장 전 공통 검사 실패 시 예외로 올린다 — db.ts 에서도 그대로 쓴다 */
+export function assertValid(reason: string | null): void {
   if (reason) throw new Error(reason);
-}
-
-/* ── 일정 ── */
-
-export function getSchedules(): Schedule[] {
-  return readList<Schedule>(KEY.schedules);
-}
-
-/** 같은 제목이면 덮어쓴다(F5 수정) · 없으면 새로 넣는다(F1 등록) */
-export function saveSchedule(schedule: Schedule, now: Date = new Date()): void {
-  assertValid(validateSchedule(schedule, now));
-  const list = getSchedules();
-  const index = list.findIndex((s) => s.title === schedule.title);
-  if (index === -1) list.push(schedule);
-  else list[index] = schedule;
-  writeList(KEY.schedules, list);
-}
-
-export function getSchedule(title: string): Schedule | undefined {
-  return getSchedules().find((s) => s.title === title);
-}
-
-/* ── 참석 응답 ── */
-
-export function getAttendances(scheduleTitle?: string): Attendance[] {
-  const list = readList<Attendance>(KEY.attendances);
-  return scheduleTitle === undefined ? list : list.filter((a) => a.schedule === scheduleTitle);
-}
-
-/** P5 — 한 사람은 일정 하나에 답 하나만. 같은 이름으로 다시 누르면 덮어쓴다 */
-export function saveAttendance(attendance: Attendance): void {
-  assertValid(validateAttendance(attendance));
-  const list = getAttendances();
-  const index = list.findIndex(
-    (a) => a.schedule === attendance.schedule && a.name === attendance.name,
-  );
-  if (index === -1) list.push(attendance);
-  else list[index] = attendance;
-  writeList(KEY.attendances, list);
-}
-
-/* ── 구성원 명단 ── */
-/* [?] 명단을 누가 · 어디서 만드나 — 06 에서 정하지 않았다. 여기서는 읽고 쓰기만 둔다 */
-
-export function getMembers(): Member[] {
-  return readList<Member>(KEY.members);
-}
-
-export function setMembers(members: Member[]): void {
-  for (const member of members) {
-    if (!member.name.trim()) throw new Error("이름을 입력하세요");
-  }
-  writeList(KEY.members, members);
 }
 
 /* ── 총무 전환(임시) ── */
@@ -190,20 +115,4 @@ export function setIsAdmin(isAdmin: boolean): void {
   if (!globalThis.localStorage) return;
   if (isAdmin) globalThis.localStorage.setItem(ADMIN_KEY, "1");
   else globalThis.localStorage.removeItem(ADMIN_KEY);
-}
-
-/* ── 공유 주소 ── */
-
-export function getShareLink(scheduleTitle: string): ShareLink | undefined {
-  return readList<ShareLink>(KEY.shareLinks).find((l) => l.schedule === scheduleTitle);
-}
-
-/** 한 일정에 주소 하나 — 새로고침 뒤에도 같아야 한다(06 근거) */
-export function saveShareLink(link: ShareLink): void {
-  if (!link.schedule.trim() || !link.url.trim()) throw new Error("어느 일정 · 주소가 비었습니다");
-  const list = readList<ShareLink>(KEY.shareLinks);
-  const index = list.findIndex((l) => l.schedule === link.schedule);
-  if (index === -1) list.push(link);
-  else list[index] = link;
-  writeList(KEY.shareLinks, list);
 }

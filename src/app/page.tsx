@@ -1,23 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Screen, ScreenHeader } from "@/components/screen";
 import { ScheduleCard } from "@/components/schedule-card";
-import { getSchedules, getAttendances, getIsAdmin, setIsAdmin } from "@/lib/storage";
+import { getSchedules, getAttendances } from "@/lib/db";
+import { getIsAdmin, setIsAdmin } from "@/lib/storage";
+import type { Schedule } from "@/lib/storage";
 import { IconButton } from "@/components/ui";
 import { PlusIcon } from "@/components/icons";
 
-export default function ScheduleListPage() {
-  const [schedules] = useState(() => {
-    // 저장된 모든 일정 읽기
-    const allSchedules = getSchedules();
+type ScheduleWithLabel = Schedule & { attendeeLabel: string };
 
-    // F2: 다가오는 일정만 표시 (상태값이 "예정" 또는 "진행 중"인 것)
-    return allSchedules
-      .filter((s) => s.status === "예정" || s.status === "진행 중")
-      .sort((a, b) => a.date.localeCompare(b.date));
-  });
+export default function ScheduleListPage() {
+  const [schedules, setSchedules] = useState<ScheduleWithLabel[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      // 저장된 모든 일정 읽기
+      const allSchedules = await getSchedules();
+
+      // F2: 다가오는 일정만 표시 (상태값이 "예정" 또는 "진행 중"인 것)
+      const upcoming = allSchedules
+        .filter((s) => s.status === "예정" || s.status === "진행 중")
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const withLabels = await Promise.all(
+        upcoming.map(async (schedule) => ({
+          ...schedule,
+          attendeeLabel: await getAttendeeLabel(schedule.title),
+        })),
+      );
+
+      if (!cancelled) setSchedules(withLabels);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // P1: 총무 판정 — 로그인(모듈2) 전이라 화면의 전환 스위치로 대신한다
   const [isAdmin, setIsAdminState] = useState(getIsAdmin);
@@ -88,7 +109,7 @@ export default function ScheduleListPage() {
                 date={formatDate(schedule.date)}
                 time={schedule.time}
                 place={schedule.place}
-                attendeeLabel={getAttendeeLabel(schedule.title)}
+                attendeeLabel={schedule.attendeeLabel}
                 changed={schedule.changed}
               />
             </Link>
@@ -109,8 +130,8 @@ function formatDate(dateStr: string): string {
 }
 
 /** 참석 정보를 "참석 8명" 형식으로 반환 */
-function getAttendeeLabel(scheduleTitle: string): string {
-  const attendances = getAttendances(scheduleTitle);
+async function getAttendeeLabel(scheduleTitle: string): Promise<string> {
+  const attendances = await getAttendances(scheduleTitle);
   const attendCount = attendances.filter((a) => a.answer === "참석").length;
   return `참석 ${attendCount}명`;
 }

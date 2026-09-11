@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Screen, ScreenHeader } from "@/components/screen";
 import { Field, PrimaryButton } from "@/components/ui";
-import { getSchedule, saveSchedule, todayString } from "@/lib/storage";
+import { getSchedule, saveSchedule } from "@/lib/db";
+import { todayString } from "@/lib/storage";
 import type { Schedule } from "@/lib/storage";
 
 export default function ScheduleFormPage() {
@@ -15,21 +16,27 @@ export default function ScheduleFormPage() {
   const editTitle = searchParams.get("title");
   const isEditMode = !!editTitle;
 
-  // 상태 초기화 함수 — edit 모드일 때만 기존 데이터 로드
-  const [formData, setFormData] = useState(() => {
-    if (isEditMode && editTitle) {
-      const existing = getSchedule(editTitle);
-      if (existing) {
-        return {
+  // edit 모드는 기존 데이터를 불러온 뒤 채운다 — 불러오기 전에는 빈 칸으로 시작한다
+  const [formData, setFormData] = useState({ title: "", date: "", time: "", place: "" });
+
+  useEffect(() => {
+    if (!isEditMode || !editTitle) return;
+    let cancelled = false;
+    (async () => {
+      const existing = await getSchedule(editTitle);
+      if (existing && !cancelled) {
+        setFormData({
           title: existing.title,
           date: existing.date,
           time: existing.time,
           place: existing.place,
-        };
+        });
       }
-    }
-    return { title: "", date: "", time: "", place: "" };
-  });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditMode, editTitle]);
 
   const [dateError, setDateError] = useState(false);
 
@@ -50,7 +57,7 @@ export default function ScheduleFormPage() {
   };
 
   // 제출
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // 지난 날짜 검사
     if (validateDate(date)) {
       setDateError(true);
@@ -69,7 +76,7 @@ export default function ScheduleFormPage() {
     };
 
     try {
-      saveSchedule(schedule);
+      await saveSchedule(schedule);
       router.push(`/schedule-detail/${encodeURIComponent(title)}`);
     } catch (error) {
       console.error("일정 저장 실패:", error);
