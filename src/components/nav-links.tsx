@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/", label: "증상별 가이드" },
   { href: "/checklist", label: "체크리스트" },
   { href: "/board", label: "질문 게시판" },
+  { href: "/tips", label: "정보 공유" },
 ];
 
 export function NavLinks() {
