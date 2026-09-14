@@ -83,7 +83,7 @@ export function Reactions({
   };
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+    <div className="mt-3 flex flex-wrap items-center gap-2">
       {shown.map((r) => {
         const mine = r.users.some((u) => u.id === viewer.id);
         return (
@@ -117,7 +117,7 @@ export function Reactions({
           ))}
         </div>
         {/* form 을 쓰지 않는다 — 제출이 페이지 이동으로 새지 않게 Enter 와 버튼만 직접 받는다 */}
-        <div className="mt-3 flex gap-1.5">
+        <div className="mt-3 flex gap-2">
           <input
             ref={field}
             name="emoji"
@@ -134,7 +134,7 @@ export function Reactions({
             남기기
           </button>
         </div>
-        <p className="mt-2 text-xs text-ink-faint">이모지 자판: Windows ⊞ + . · Mac ⌃ ⌘ Space</p>
+        <p className="mt-2 text-xs text-ink-muted">이모지 자판: Windows ⊞ + . · Mac ⌃ ⌘ Space</p>
         {error && (
           <p role="alert" className="mt-1 text-xs text-danger">
             {error}

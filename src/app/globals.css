@@ -261,3 +261,10 @@ details[open] .disclosure-icon {
     animation-delay: 0s !important;
   }
 }
+
+/* 헤더(로고 줄 + 모듈 탭 줄)가 sm 이상에서 붙어 있으므로, # 이동과 키보드 포커스가 그 밑에 숨지 않게 */
+@media (min-width: 40rem) {
+  html {
+    scroll-padding-top: 7rem;
+  }
+}

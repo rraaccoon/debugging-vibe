@@ -85,7 +85,7 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
                       <span className="rounded-full bg-mist px-2 py-0.5 text-xs font-bold text-ink-muted">{moduleLabel(p.module)}</span>
                     )}
                     <span className="text-ink-muted">{authorLabel(p, viewer?.role)}</span>
-                    <span className="text-ink-faint">{formatDate(p.createdAt)}</span>
+                    <span className="text-ink-muted">{formatDate(p.createdAt)}</span>
                     {p.reactions.length > 0 && (
                       <span className="ml-auto flex flex-wrap gap-1">
                         {p.reactions.map((r) => (
@@ -103,7 +103,7 @@ export default async function BoardPage({ searchParams }: { searchParams: Promis
         )}
 
         {pages > 1 && (
-          <nav style={stagger(3)} aria-label="쪽 이동" className="mt-8 flex flex-wrap items-center justify-center gap-1.5 text-sm">
+          <nav style={stagger(3)} aria-label="쪽 이동" className="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm">
             {page > 1 && (
               <Link href={href(page - 1)} className={CHIP}>
                 ← 이전

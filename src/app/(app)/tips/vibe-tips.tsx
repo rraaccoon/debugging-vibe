@@ -140,7 +140,7 @@ export function VibeTips() {
                       .sort((a, b) => b.stars - a.stars)
                       .map((it, i) => (
                       <li key={it.name} className="grid gap-1 py-3 sm:grid-cols-[1.5rem_1fr]">
-                        <span className="text-sm font-bold tabular-nums text-ink-faint">{i + 1}</span>
+                        <span className="text-sm font-bold tabular-nums text-ink-muted">{i + 1}</span>
                         <div>
                           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                             <a

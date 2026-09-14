@@ -4,7 +4,7 @@ import { setModule } from "@/lib/actions";
 /** 헤더 둘째 줄 — 모듈을 고르면 쿠키에 남고 네 화면이 그 모듈로 걸러진다 */
 export function ModuleTabs({ current }: { current: ModuleSlug }) {
   return (
-    <div role="group" aria-label="수업 모듈" className="mx-auto flex max-w-3xl flex-wrap items-center gap-1.5 px-4 pb-2.5">
+    <div role="group" aria-label="수업 모듈" className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 px-4 pb-2.5">
       {MODULES.map((m) => {
         const on = m.slug === current;
         return (
@@ -17,7 +17,7 @@ export function ModuleTabs({ current }: { current: ModuleSlug }) {
                 on ? "bg-ink text-white shadow-clay-sm" : "border border-line bg-white text-ink-muted hover:-translate-y-0.5 hover:border-ink-faint hover:text-ink"
               }`}
             >
-              <span className={on ? "opacity-60" : "text-ink-faint"}>{m.short}</span> {m.name}
+              <span className={on ? "opacity-60" : "text-ink-muted"}>{m.short}</span> {m.name}
             </button>
           </form>
         );
