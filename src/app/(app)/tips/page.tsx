@@ -170,18 +170,6 @@ export default function TipsPage() {
             ))}
           </div>
         </section>
-
-        <section style={stagger(7)} className="mt-10">
-          <h2 className="font-display text-xl">요즘 많이 쓰는 것들</h2>
-          <dl className="mt-3 divide-y divide-line">
-            {POPULAR.map((p) => (
-              <div key={p.name} className="grid gap-1 py-3 sm:grid-cols-[11rem_1fr]">
-                <dt className="font-bold">{p.name}</dt>
-                <dd className="text-ink-muted">{p.what}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
       </div>
     </PageTransition>
   );
