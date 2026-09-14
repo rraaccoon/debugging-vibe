@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { after } from "next/server";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import * as db from "@/lib/db";
 import { createSession, deleteSession, getUser, requireUser } from "@/lib/session";
@@ -9,6 +11,25 @@ import { createSession, deleteSession, getUser, requireUser } from "@/lib/sessio
 export type FormState = { error?: string } | undefined;
 
 const field = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
+
+/** Slack mrkdwn 에서 & < > 는 이렇게 바꿔 써야 링크 문법과 섞이지 않는다 */
+const slackEscape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/**
+ * 새 질문을 슬랙 채널에 알린다 — Slack 앱의 Incoming Webhook(무료 플랜에서 됨).
+ * SLACK_WEBHOOK_URL 이 없으면 조용히 건너뛰고, 실패해도 질문 저장에는 영향이 없다(응답 뒤에 보냄).
+ */
+function notifySlack(text: string): void {
+  const url = process.env.SLACK_WEBHOOK_URL;
+  if (!url) return;
+  after(() =>
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+      })
+      .catch((e) => console.error("슬랙 알림 실패:", e)),
+  );
+}
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
   const name = field(formData, "name");
@@ -64,6 +85,9 @@ export async function createPost(_prev: FormState, formData: FormData): Promise<
     return { error: "여섯 칸을 모두 채워 주세요. 답하는 사람이 상황을 그대로 볼 수 있어야 해요." };
   }
   const id = await db.createPost(user.id, fields);
+  const h = await headers();
+  const origin = h.get("origin") ?? `https://${h.get("host")}`;
+  notifySlack(`📩 새 질문 — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`);
   redirect(`/board/${id}`);
 }
 

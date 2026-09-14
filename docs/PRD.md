@@ -15,6 +15,7 @@
 | 질문 게시판 | 증상 한 줄 + 무엇을 하다가 · 언제부터 · 어떻게 했나 · 예상 값 · 실제 값 (01 강사 결정). 강사와 학생이 답한다. 강사 답은 색으로 구분 | `/board` · `/board/new` · `/board/[id]` |
 | 로그인 | 수강생만(01). 강사 계정과 학생 공용 계정은 강사가 만든다 — `npm run user:add -- 이름 비밀번호 [instructor\|shared]` | `/login` |
 | 별 수 자동 갱신 | 정보 공유의 저장소 순위를 매일 08:30(한국 시간) 에 GitHub 에서 다시 읽어 `src/content/tips.ts` 의 숫자만 고치고 main 에 커밋한다 — Vercel 이 그 커밋으로 자동 배포. 설명 문장과 목록은 강사가 손으로 고친다 (강사 결정: 별 수와 순서만 자동) | `.github/workflows/update-stars.yml` · `scripts/update-stars.ts` |
+| 새 질문 슬랙 알림 | 질문이 올라오면 슬랙 채널에 쓴 사람(닉네임) · 제목 · 링크를 보낸다. Slack 앱의 Incoming Webhook 을 쓴다(무료 플랜에서 됨 — Workflow Builder 웹훅은 유료). 환경변수 `SLACK_WEBHOOK_URL` 이 없으면 알림 없이 그대로 동작한다 (강사 요청 · 월) | `src/lib/actions.ts` createPost |
 | 내 계정 만들기 | 학생은 공용 계정으로 처음 들어오면 바로 닉네임(로그인 ID) · 이름(강사만 봄) · 비밀번호를 정해 자기 계정을 만든다 (강사 결정) | `/setup` |
 
 ## 2. 안 만드는 것
