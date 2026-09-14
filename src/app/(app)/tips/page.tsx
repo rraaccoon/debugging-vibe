@@ -19,6 +19,8 @@ export const metadata: Metadata = { title: "정보 공유" };
 const PROMPT_BLOCK =
   "mt-2 -rotate-[0.4deg] whitespace-pre-wrap rounded-xl bg-mark px-4 py-3 font-sans text-sm leading-relaxed shadow-clay-sm";
 
+const LINK = "text-action underline decoration-action/30 underline-offset-2 transition-colors hover:decoration-action";
+
 const CODE_BLOCK = "mt-2 overflow-x-auto whitespace-pre rounded-xl bg-ink px-4 py-3 font-sans text-[13px] leading-relaxed text-white";
 
 export default function TipsPage() {
@@ -112,7 +114,12 @@ export default function TipsPage() {
           <div className="mt-4 grid gap-3">
             {ECOSYSTEM.map((g) => (
               <article key={g.id} className="rounded-2xl border border-line bg-white p-5 shadow-clay-sm">
-                <h3 className="font-display text-lg leading-tight">{g.title}</h3>
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <h3 className="font-display text-lg leading-tight">{g.title}</h3>
+                  <a className={`shrink-0 text-sm ${LINK}`} href={g.docs} target="_blank" rel="noopener noreferrer">
+                    공식 문서 ↗
+                  </a>
+                </div>
                 <p className="mt-1 text-sm leading-relaxed">{g.definition}</p>
 
                 <p className="mt-3 rounded-xl bg-action-soft px-4 py-3 text-sm leading-relaxed">
@@ -138,7 +145,14 @@ export default function TipsPage() {
                         <span className="text-sm font-bold tabular-nums text-ink-faint">{i + 1}</span>
                         <div>
                           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                            <span className="font-bold break-all">{it.name}</span>
+                            <a
+                              className={`font-bold break-all ${LINK}`}
+                              href={`https://github.com/${it.name}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {it.name} ↗
+                            </a>
                             <span className="rounded-full bg-mark px-2 py-0.5 text-xs font-bold tabular-nums">
                               ★ {formatStars(it.stars)}
                             </span>

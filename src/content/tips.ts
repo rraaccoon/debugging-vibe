@@ -143,6 +143,8 @@ export type EcoItem = {
 export type EcoGroup = {
   id: string;
   title: string;
+  /** 공식 문서 주소 — 학생이 원문을 직접 볼 수 있게 */
+  docs: string;
   /** 공식 문서의 한 줄 정의 */
   definition: string;
   /** 파일이 어디 있고 어떻게 만드나 */
@@ -156,6 +158,7 @@ export const ECOSYSTEM: EcoGroup[] = [
   {
     id: "eco-skill",
     title: "스킬 (Agent Skills)",
+    docs: "https://code.claude.com/docs/en/skills",
     definition: "AI 에게 절차를 적어 준 파일. 공식 문서는 \"에이전트에 능력을 더하는 공개 표준\" 이라고 부른다.",
     howTo: `# 내 컴퓨터 전체에서 쓰기
 ~/.claude/skills/이름/SKILL.md
@@ -179,6 +182,7 @@ github.com/anthropics/skills`,
   {
     id: "eco-agent",
     title: "서브에이전트 (Subagents)",
+    docs: "https://code.claude.com/docs/en/sub-agents",
     definition: "공식 문서: \"각자 자기 대화 창을 따로 가지고, 정해진 종류의 일만 하는 AI 조수\".",
     howTo: `# 이 프로젝트에서만
 .claude/agents/이름.md
@@ -203,6 +207,7 @@ github.com/anthropics/skills`,
   {
     id: "eco-plugin",
     title: "플러그인 (Plugins)",
+    docs: "https://code.claude.com/docs/en/plugins",
     definition: "공식 문서: \"스킬 · 에이전트 · MCP · 훅 을 한 묶음으로 만들어 팀과 여러 프로젝트에 나눠 주는 것\".",
     howTo: `# 목록 보기 (공식 마켓은 처음 켤 때 자동으로 들어와 있다)
 /plugin
@@ -226,6 +231,7 @@ github.com/anthropics/skills`,
   {
     id: "eco-mcp",
     title: "MCP (외부 도구 연결)",
+    docs: "https://code.claude.com/docs/en/mcp",
     definition: "공식 문서: \"AI 를 바깥 도구 · 데이터에 연결하는 공개 표준\". 외부 프로그램을 만지게 하는 방법은 이것뿐이다.",
     howTo: `# 이 프로젝트에서만 (.mcp.json 에 적힌다 — 팀과 쓰려면 커밋)
 claude mcp add --scope project 이름 주소
