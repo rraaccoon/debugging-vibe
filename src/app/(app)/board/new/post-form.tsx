@@ -19,7 +19,7 @@ export function PostForm({ defaultModule }: { defaultModule: ModuleSlug }) {
   return (
     <form action={action} className="mt-8 flex flex-col gap-5 rounded-2xl border border-line bg-white p-5 shadow-clay sm:p-6">
       <fieldset className="flex flex-col gap-1 text-sm font-bold">
-        <legend>어느 모듈 질문인가요</legend>
+        <legend>어느 모듈에서 났나요</legend>
         <div className="mt-1 flex flex-wrap gap-2">
           {MODULES.map((m) => (
             <label key={m.slug} className="cursor-pointer">
@@ -34,7 +34,7 @@ export function PostForm({ defaultModule }: { defaultModule: ModuleSlug }) {
         </div>
       </fieldset>
       <label className="flex flex-col gap-1 text-sm font-bold">
-        증상을 한 줄로
+        어디가 타나요? 한 줄로
         <input
           name="title"
           required
@@ -57,7 +57,7 @@ export function PostForm({ defaultModule }: { defaultModule: ModuleSlug }) {
         </p>
       )}
       <button type="submit" disabled={pending} className={`${BUTTON} self-start`}>
-        {pending ? "올리는 중" : "질문 올리기"}
+        {pending ? "신고 중" : "신고하기"}
       </button>
     </form>
   );

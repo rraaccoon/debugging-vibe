@@ -6,7 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { stagger } from "@/components/ui";
 import { VibeTips } from "./vibe-tips";
 
-export const metadata: Metadata = { title: "정보 공유" };
+export const metadata: Metadata = { title: "소방 교육" };
 
 const LINK = "text-action underline decoration-action/30 underline-offset-2 transition-colors hover:decoration-action";
 
@@ -19,11 +19,11 @@ export default async function TipsPage() {
     <PageTransition>
       <div className="stagger">
         <h1 style={stagger(0)} className="font-display text-3xl leading-tight sm:text-4xl">
-          정보 공유
+          소방 교육
         </h1>
         {tips.length === 0 ? (
           <div style={stagger(1)}>
-            <ComingSoon module={mod} what="정보 공유" />
+            <ComingSoon module={mod} what="소방 교육" />
           </div>
         ) : (
           tips.map((t, i) => (

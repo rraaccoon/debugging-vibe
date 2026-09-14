@@ -2,21 +2,24 @@
 
 @theme {
   --color-*: initial;
-  --color-paper: #ffffff;
+  --color-paper: #f6f8fb;
   --color-white: #ffffff;
-  --color-mist: #f1f6f4;
+  --color-mist: #eaf0f6;
   --color-ink: #1e2330;
   --color-ink-muted: #5b6472;
   --color-ink-faint: #9aa3ad;
-  --color-line: #e4e6df;
+  --color-line: #e1e6ec;
   --color-mark: #fff0a3;
   --color-mark-deep: #f2d23a;
-  --color-action: #0f766e;
-  --color-action-deep: #115e59;
-  --color-action-soft: #d8f3ee;
+  --color-action: #1a6fd3;
+  --color-action-deep: #1557b0;
+  --color-action-soft: #dcecff;
   --color-siren: #f04e23;
   --color-siren-deep: #c93a13;
   --color-siren-soft: #ffe9e1;
+  --color-flame: #ff8f2a;
+  --color-flame-deep: #9a3f0a;
+  --color-flame-soft: #ffe8d1;
   --color-danger: #b42318;
   --color-danger-soft: #fceceb;
 
@@ -100,7 +103,7 @@
 
 @layer base {
   body {
-    background-image: radial-gradient(70rem 26rem at 50% -8rem, #dff4ec 0%, rgba(223, 244, 236, 0) 65%);
+    background-image: radial-gradient(70rem 26rem at 50% -8rem, #dbe9fb 0%, rgba(219, 233, 251, 0) 65%);
     background-repeat: no-repeat;
   }
 }
@@ -129,6 +132,32 @@
 @keyframes stripe-run {
   to {
     background-position: 14.14px 0;
+  }
+}
+
+/* 홈 첫 화면의 소방차 장면 — 불꽃이 일렁이고 물줄기가 흐르고 경광등이 깜빡인다. 움직임 줄이기 설정이면 멈춤 */
+.fire-scene .flame {
+  animation: flicker 900ms ease-in-out infinite alternate;
+}
+.fire-scene .hose {
+  animation: hose-flow 600ms linear infinite;
+}
+.fire-scene .beacon {
+  animation: beacon 1000ms steps(1) infinite;
+}
+@keyframes flicker {
+  to {
+    transform: scaleY(0.92) skewX(-3deg);
+  }
+}
+@keyframes hose-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+@keyframes beacon {
+  50% {
+    fill: var(--color-siren-deep);
   }
 }
 

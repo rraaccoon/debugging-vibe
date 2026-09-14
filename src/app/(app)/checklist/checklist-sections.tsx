@@ -21,7 +21,7 @@ export function ChecklistSections({ lists }: { lists: Checklist[] }) {
               </span>
               {all && (
                 <span className="animate-pop rounded-full bg-action px-2.5 py-0.5 text-xs font-bold text-white">
-                  준비 완료
+                  점검 완료
                 </span>
               )}
             </div>

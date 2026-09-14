@@ -19,7 +19,7 @@ async function find(slug: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  return { title: (await find(slug))?.category.title ?? "가이드" };
+  return { title: (await find(slug))?.category.title ?? "진압 매뉴얼" };
 }
 
 export default async function CategoryPage({ params }: Props) {
@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: Props) {
           style={stagger(0)}
           className="inline-block text-sm text-ink-muted transition-colors hover:text-ink"
         >
-          ← 유형 고르기
+          ← 불 종류 고르기
         </Link>
         <ViewTransition name={`cat-${slug}`} share="morph" default="none">
           <h1 style={stagger(1)} className="mt-3 font-display text-3xl leading-tight sm:text-4xl">
@@ -47,8 +47,8 @@ export default async function CategoryPage({ params }: Props) {
           </h1>
         </ViewTransition>
         <p style={stagger(2)} className="mt-3 max-w-prose text-ink-muted">
-          {category.blurb}. 증상을 열면 원인, 먼저 확인할 것, 그리고 AI 도구에 붙여넣을 말이 있어요. [대괄호]는 내
-          상황으로 바꿔서 붙이세요.
+          {category.blurb}. 증상을 열면 원인, 먼저 확인할 것, 그리고 AI 도구에 붙여넣을 진압 지시가 있어요. [대괄호]는
+          내 상황으로 바꿔서 붙이세요.
         </p>
         <div style={stagger(3)} className="mt-6 divide-y divide-line">
           {items.map((g) => (
@@ -56,7 +56,7 @@ export default async function CategoryPage({ params }: Props) {
           ))}
         </div>
         <nav style={stagger(4)} className="mt-12 border-t border-line pt-6">
-          <p className="text-sm font-bold text-ink-muted">다른 유형</p>
+          <p className="text-sm font-bold text-ink-muted">다른 불 종류</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {others.map((c) => (
               <Link key={c.slug} href={`/guide/${c.slug}`} className={CHIP}>

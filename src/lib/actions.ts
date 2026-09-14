@@ -86,7 +86,7 @@ export async function createPost(_prev: FormState, formData: FormData): Promise<
     actual: field(formData, "actual"),
   };
   if (Object.values(fields).some((v) => !v)) {
-    return { error: "여섯 칸을 모두 채워 주세요. 답하는 사람이 상황을 그대로 볼 수 있어야 해요." };
+    return { error: "여섯 칸을 모두 채워 주세요. 출동하는 사람이 상황을 그대로 볼 수 있어야 해요." };
   }
   const picked = field(formData, "module");
   const mod = isModuleSlug(picked) ? picked : await getModule();
@@ -96,7 +96,7 @@ export async function createPost(_prev: FormState, formData: FormData): Promise<
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;
   notifySlack(
-    `📩 새 질문 · ${slackEscape(moduleLabel(mod))} — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`,
+    `🚨 출동 요청 · ${slackEscape(moduleLabel(mod))} — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`,
   );
   redirect(`/board/${id}`);
 }

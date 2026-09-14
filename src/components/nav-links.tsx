@@ -4,11 +4,12 @@ import { ViewTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+/** 소방 컨셉 이름. 진압 매뉴얼 = 증상별 가이드, 예방 점검 = 체크리스트, 출동 요청 = 질문 게시판, 소방 교육 = 정보 공유 */
 const LINKS = [
-  { href: "/", label: "증상별 가이드" },
-  { href: "/checklist", label: "체크리스트" },
-  { href: "/board", label: "질문 게시판" },
-  { href: "/tips", label: "정보 공유" },
+  { href: "/", label: "진압 매뉴얼" },
+  { href: "/checklist", label: "예방 점검" },
+  { href: "/board", label: "출동 요청" },
+  { href: "/tips", label: "소방 교육" },
 ];
 
 export function NavLinks() {
@@ -28,7 +29,7 @@ export function NavLinks() {
             {l.label}
             {active && (
               <ViewTransition name="nav-active">
-                <span className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-action" />
+                <span className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-siren" />
               </ViewTransition>
             )}
           </Link>

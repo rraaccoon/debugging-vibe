@@ -10,12 +10,12 @@ export function formatDate(iso: string): string {
   });
 }
 
-/** 강사에게는 "닉네임 (이름)", 학생에게는 닉네임만. 강사 글에는 (강사) */
+/** 강사에게는 "닉네임 (이름)", 학생에게는 닉네임만. 강사 글에는 (소방관) — 소방 컨셉의 강사 호칭 */
 export function authorLabel(
   a: { author: string; authorRealName: string | null; authorRole: Role },
   viewerRole: Role | undefined,
 ): string {
-  if (a.authorRole === "instructor") return `${a.author} (강사)`;
+  if (a.authorRole === "instructor") return `${a.author} (소방관)`;
   if (viewerRole === "instructor" && a.authorRealName) return `${a.author} (${a.authorRealName})`;
   return a.author;
 }

@@ -45,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         <ModuleTabs current={mod} />
+        <div aria-hidden="true" className="siren-stripe h-1" />
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
     </>

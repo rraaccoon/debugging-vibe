@@ -22,7 +22,7 @@ export default async function LoginPage() {
           <Wordmark />
         </h1>
         <p style={stagger(2)} className="mt-2 text-ink-muted">
-          바이브 코딩하다 <span className="marker">막히면 여기로</span>. 강사에게 받은 수업 계정으로 들어오세요.
+          코드에 <span className="marker">불나면 여기로</span>. 119 가 출동해요. 강사에게 받은 수업 계정으로 들어오세요.
         </p>
         <div style={stagger(3)} className="mt-8 rounded-2xl border border-line bg-white p-6 shadow-clay">
           <LoginForm />

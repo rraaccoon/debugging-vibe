@@ -9,7 +9,7 @@ const notoSansKR = Noto_Sans_KR({
   preload: false,
 });
 
-const DESCRIPTION = "바이브 코딩하다 막히면 여기로. 증상 찾고, 프롬프트 복사하고, AI에게 다시 시키기";
+const DESCRIPTION = "코드에 불나면 여기로. 불 종류 찾고, 프롬프트 복사하고, AI에게 다시 시키기";
 
 /**
  * 사이트 전체가 로그인 뒤라 검색 노출은 막고(noindex), 단톡방·슬랙에 링크를 올릴 때 미리보기만 예쁘게 나오게 한다.

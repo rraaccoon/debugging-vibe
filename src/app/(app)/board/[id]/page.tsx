@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/page-transition";
 import { PasteImages } from "@/components/paste-images";
 import { Reactions } from "@/components/reactions";
 import { moduleLabel } from "@/content/modules";
+import { STATUS, statusOf } from "@/lib/status";
 import { BUTTON, INPUT, stagger } from "@/components/ui";
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,6 +19,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const { post, answers } = data;
   // 이모지 반응이 서버 답 전에 화면에 먼저 그려질 때 쓰는 "나". 레이아웃이 로그인 안 한 사람은 먼저 돌려보낸다
   const me = { id: viewer?.id ?? 0, name: viewer?.name ?? "" };
+  const status = STATUS[statusOf(post.reactions)];
 
   const fields = [
     ["무엇을 하다가", post.whatDoing],
@@ -36,10 +38,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           style={stagger(0)}
           className="inline-block text-sm text-ink-muted transition-colors hover:text-ink"
         >
-          ← 질문 게시판
+          ← 출동 요청
         </Link>
         <p style={stagger(1)} className="mt-4">
-          <span className="rounded-full bg-siren-soft px-2.5 py-0.5 text-xs font-bold text-siren">질문</span>
+          <span className="rounded-full bg-siren-soft px-2.5 py-0.5 text-xs font-bold text-siren">신고</span>
+          <span className={`ml-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${status.badge}`}>
+            {status.emoji} {status.label}
+          </span>
           <span className="ml-1.5 rounded-full bg-mist px-2.5 py-0.5 text-xs font-bold text-ink-muted">{moduleLabel(post.module)}</span>
         </p>
         <h1 style={stagger(1)} className="mt-2 font-display text-3xl leading-tight">
@@ -64,11 +69,11 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
         <section style={stagger(3)} className="mt-10 border-t-2 border-dashed border-line pt-8">
           <h2 className="flex items-center gap-2 font-display text-xl">
-            <span className="rounded-full bg-action-soft px-2.5 py-0.5 text-xs font-bold text-action">답</span>
-            {answers.length}개
+            <span className="rounded-full bg-action-soft px-2.5 py-0.5 text-xs font-bold text-action-deep">출동</span>
+            {answers.length}건
           </h2>
           {answers.length === 0 ? (
-            <p className="mt-3 text-ink-muted">아직 답이 없어요. 첫 답을 남겨 주세요.</p>
+            <p className="mt-3 text-ink-muted">아직 출동한 사람이 없어요. 아는 것이 있으면 먼저 출동해 주세요.</p>
           ) : (
             <ul className="stagger mt-3 flex flex-col gap-3">
               {answers.map((a, i) => (
@@ -92,7 +97,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
           <form action={addAnswer} className="mt-6 flex flex-col gap-3">
             <input type="hidden" name="post_id" value={post.id} />
             <label className="flex flex-col gap-1 text-sm font-bold">
-              답 남기기
+              출동 보고
               <textarea
                 name="body"
                 required
@@ -103,7 +108,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
             </label>
             <PasteImages />
             <button type="submit" className={`${BUTTON} self-start`}>
-              답 남기기
+              출동 보고 남기기
             </button>
           </form>
         </section>
