@@ -12,7 +12,7 @@ export const CATEGORIES: Category[] = [
   { slug: "deploy", title: "배포", blurb: "빌드는 됐는데 열면 안 나오거나, 옛 버전이 보이거나, 사이트가 죽었을 때" },
   { slug: "wrong-value", title: "예상과 다른 값", blurb: "화면에 이상한 값이 나오거나 저장한 게 사라질 때" },
   { slug: "data-flow", title: "데이터 흐름 끊김", blurb: "눌렀는데 아무 일도 없고, 넣었는데 목록에 안 나올 때" },
-  { slug: "db", title: "DB", blurb: "연결 오류, 테이블·칸이 없다는 말, 비밀번호 유출" },
+  { slug: "db", title: "DB", blurb: "연결 오류, 저장이 403 으로 막힘, 테이블·칸이 없다는 말, 비밀번호 유출" },
   { slug: "routing", title: "페이지 이동 오류", blurb: "404가 나거나, 저장 뒤에 안 넘어갈 때" },
   { slug: "ai", title: "AI가 이상하게 굴 때", blurb: "없는 걸 고쳤다고 하거나, 너무 많이 바꾸거나, 아까 말을 잊을 때" },
   { slug: "teamwork", title: "팀 작업", blurb: "같이 만들다 서로의 작업이 부딪힐 때" },
@@ -288,6 +288,25 @@ git log 로 최근 커밋 목록을 보여주고, 각 커밋이 무엇을 바꿨
 
   /* ── DB ── */
   {
+    id: "db-triage",
+    category: "DB",
+    symptom: "DB 에러가 났는데 어디부터 봐야 할지 모르겠어요",
+    cause:
+      "DB 문제는 거의 네 가지 중 하나입니다. ① 연결이 안 됨(주소 · 비밀번호 · 환경변수) ② 권한이 없음(RLS 정책 · 키 종류) ③ 표나 칸이 없음(아직 안 만들었거나 이름이 다름) ④ 값이 규칙에 안 맞음(빈 값 · 중복 · 형식). 에러 문구의 숫자와 영어 단어를 보면 어느 쪽인지 바로 갈립니다.",
+    checkFirst: [
+      "에러 문구를 고치지 말고 그대로 복사하세요. 숫자(401 · 403 · 404 · 500)와 영어 단어가 실마리입니다.",
+      "ECONNREFUSED · password · timeout → ① 연결. 401 · 403 · permission denied · row-level security → ② 권한. 404 · does not exist · Could not find the table → ③ 표·칸. 400 · null value · duplicate key · invalid input → ④ 값.",
+      "내 컴퓨터(localhost)와 배포(Vercel) 둘 다에서 나는지 보세요. 한쪽에서만 나면 환경변수 차이입니다.",
+      "DB 대시보드(Neon · Supabase)에서 표와 줄이 실제로 있는지 눈으로 확인하세요. 코드보다 대시보드가 진실입니다.",
+    ],
+    prompt: `DB 관련 에러가 났어: [에러 문구 그대로]
+어디서: [내 컴퓨터 / Vercel / 둘 다], 무엇을 하다가: [저장 / 읽기 / 처음 실행]
+
+1. 이 에러가 연결 · 권한 · 표·칸 없음 · 값 문제 중 어느 것인지 먼저 한 줄로 분류해줘.
+2. 그 분류에 맞게, 코드를 고치기 전에 내가 대시보드나 파일에서 눈으로 확인할 것을 알려줘.
+3. 확인 결과를 말하면 그때 고칠 것을 제안해줘. 확인 없이 여러 곳을 한 번에 고치지 마. DB 비밀번호 · 키 값은 출력하지 마.`,
+  },
+  {
     id: "db-connection",
     category: "DB",
     symptom: "DB 연결 오류가 나요 (connection, ECONNREFUSED, password authentication failed)",
@@ -325,6 +344,58 @@ Vercel 에서도 같은 에러가 나면 환경변수 등록이 필요한지 알
     prompt: `이 에러가 나: column "[칸 이름]" does not exist
 
 테이블을 만드는 코드와 지금 코드가 쓰는 칸을 비교해서 무엇이 다른지 알려줘. 데이터를 지우지 않고 칸을 추가하는 방법(ALTER TABLE)을 먼저 제안하고, 내가 확인하면 실행해줘. DROP 은 내가 '지워도 된다'고 말하기 전에는 하지 마.`,
+  },
+  {
+    id: "supabase-403-rls",
+    category: "DB",
+    symptom: "Supabase 에 저장하면 403 이 나요 (row-level security / permission denied)",
+    cause:
+      "Supabase 는 테이블마다 RLS(행 단위 보안)가 켜져 있습니다. 브라우저용 anon 키는 정책(policy)이 허용한 것만 할 수 있는데, 새 테이블에는 허용 정책이 하나도 없어서 넣기(insert)가 막힌 것입니다. 코드가 틀린 게 아니라 DB 가 '너는 이 표에 못 쓴다'고 답한 것입니다.",
+    checkFirst: [
+      "에러 문구에 row-level security 나 permission denied 가 있으면 이 항목입니다. 401 은 키가 틀린 것, 404 는 테이블 이름이 틀린 것이라 다른 항목을 보세요.",
+      "Supabase 대시보드 → Table Editor → 그 테이블에서 RLS 가 켜져 있고(Enabled) Policies 가 비어 있는지 보세요.",
+      "저장하는 코드가 브라우저에서 도는지 서버(서버 액션 · API)에서 도는지 확인하세요. 로그인 없는 프로젝트는 서버에서 service_role 키로 저장하는 것이 가장 간단합니다.",
+      "service_role 키는 DB 의 모든 권한을 가진 비밀번호입니다. 브라우저 코드 · NEXT_PUBLIC_ 으로 시작하는 변수 · 채팅에 넣으면 안 됩니다.",
+    ],
+    prompt: `Supabase 에 insert 하면 403 이 나: [에러 문구 그대로]
+테이블은 [테이블 이름], 우리 앱은 로그인이 [있다 / 없다].
+
+1. 이 에러가 RLS 정책 때문인지 확인해줘.
+2. 저장 코드를 서버(서버 액션)에서만 돌게 바꾸고, 그 서버 코드에서만 SUPABASE_SERVICE_ROLE_KEY 를 읽게 해줘. 이 키는 .env.local 과 Vercel 환경변수에만 두고 브라우저 코드 · NEXT_PUBLIC_ 변수에는 절대 넣지 마. 값은 출력하지 마.
+3. 브라우저에서 꼭 직접 넣어야 한다면, 이 테이블에 필요한 최소 정책(어느 역할이 무엇을 할 수 있는지)을 SQL 로 보여 주고 내가 확인하면 적용 방법을 알려줘.`,
+  },
+  {
+    id: "supabase-empty-select",
+    category: "DB",
+    symptom: "Supabase 대시보드에는 데이터가 있는데 화면에는 빈 목록이에요",
+    cause:
+      "읽기(select)도 RLS 정책이 없으면 막히는데, 이때는 에러 대신 빈 목록([])이 옵니다. 그래서 코드가 잘 돈 것처럼 보이지만 실제로는 하나도 못 읽은 것입니다.",
+    checkFirst: [
+      "Table Editor 에는 줄이 보이는데 화면은 비었고 에러도 없으면 이 항목입니다.",
+      "브라우저 개발자 도구(F12) → Network 에서 그 요청을 눌러 응답이 [] 인지 보세요.",
+      "그 테이블의 Policies 에 SELECT 를 허용하는 정책이 있는지 보세요.",
+    ],
+    prompt: `Supabase 테이블 [테이블 이름]에 데이터가 있는데 앱에서 읽으면 빈 배열이 와. 에러는 없어. 우리 앱은 로그인이 [있다 / 없다].
+
+1. RLS 의 select 정책 때문인지 확인해줘.
+2. 읽기를 서버에서 service_role 키로 하는 방법과, 이 테이블에 읽기 허용 정책을 만드는 방법 중 우리 상황에 맞는 것을 먼저 설명해줘.
+3. 내가 고르면 그것만 적용해줘. 키 값은 출력하지 마.`,
+  },
+  {
+    id: "db-value-rule",
+    category: "DB",
+    symptom: "저장할 때 null value in column / duplicate key / invalid input 이 나요",
+    cause:
+      "표의 규칙에 안 맞는 값을 넣은 것입니다. 꼭 있어야 하는 칸이 비었거나(null value), 같은 값이 두 번 들어갔거나(duplicate key), 숫자 칸에 글자를 넣은(invalid input) 경우입니다. 폼의 빈 칸을 그대로 보낸 것이 가장 많습니다.",
+    checkFirst: [
+      "문구에서 칸 이름(column \"…\")을 보세요. 폼의 그 칸 이름과 코드가 쓰는 이름이 같은지 확인하세요.",
+      "duplicate 면 이미 같은 값이 있는 것입니다. 대시보드에서 그 줄을 찾아보세요.",
+    ],
+    prompt: `저장할 때 이 에러가 나: [에러 문구 그대로]
+
+1. 폼의 어느 칸이 이 DB 칸으로 가는지 연결을 보여줘.
+2. 빈 값이 문제면 화면에서 먼저 막을지(required) DB 규칙을 바꿀지 장단점을 알려줘. 중복이 문제면 같은 값을 막을지 덮어쓸지 물어봐.
+3. 내가 고르면 그것만 고쳐줘.`,
   },
   {
     id: "different-db",
