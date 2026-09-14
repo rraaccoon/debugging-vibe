@@ -119,6 +119,19 @@
 }
 
 /* 형광펜 한 줄 — 페이지의 유일한 자동 재생 강조 */
+/* "119" 밑 소방차 줄무늬. 부모 .group 에 마우스를 올리면 경광등처럼 흐른다 (움직임 줄이기 설정이면 멈춤) */
+.siren-stripe {
+  background: repeating-linear-gradient(135deg, var(--color-siren) 0 6px, var(--color-siren-soft) 6px 10px);
+}
+.group:hover .siren-stripe {
+  animation: stripe-run 700ms linear infinite;
+}
+@keyframes stripe-run {
+  to {
+    background-position: 14.14px 0;
+  }
+}
+
 .marker {
   background: linear-gradient(transparent 52%, var(--color-mark) 52%, var(--color-mark) 92%, transparent 92%) no-repeat 0 0;
   background-size: 0% 100%;

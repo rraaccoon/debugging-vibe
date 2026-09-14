@@ -6,6 +6,7 @@ import { logout } from "@/lib/actions";
 import { NavLinks } from "@/components/nav-links";
 import { ModuleTabs } from "@/components/module-tabs";
 import { BrandMark } from "@/components/brand-mark";
+import { Wordmark } from "@/components/wordmark";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const [user, mod] = await Promise.all([getUser(), getModule()]);
@@ -20,10 +21,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2.5">
           <Link
             href="/"
-            className="flex items-center gap-2 py-1 font-display text-lg transition-transform duration-300 ease-spring hover:-rotate-2"
+            className="group flex items-center gap-2 py-1 font-display text-lg transition-transform duration-300 ease-spring hover:-rotate-2"
           >
             <BrandMark />
-            디버그 119
+            <span>
+              <Wordmark />
+            </span>
           </Link>
           <NavLinks />
           <div className="ml-auto flex items-center gap-1 text-sm text-ink-muted">
