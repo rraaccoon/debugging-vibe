@@ -135,15 +135,60 @@
   }
 }
 
-/* 홈 첫 화면의 소방차 장면 — 불꽃이 일렁이고 물줄기가 흐르고 경광등이 깜빡인다. 움직임 줄이기 설정이면 멈춤 */
-.fire-scene .flame {
+/* 소방 그림(.fire-anim 안) — 불꽃이 일렁이고 물줄기가 흐르고 경광등이 깜빡인다. 움직임 줄이기 설정이면 멈춤 */
+.fire-anim .flame {
   animation: flicker 900ms ease-in-out infinite alternate;
 }
-.fire-scene .hose {
+.fire-anim .hose {
   animation: hose-flow 600ms linear infinite;
 }
-.fire-scene .beacon {
+.fire-anim .beacon {
   animation: beacon 1000ms steps(1) infinite;
+}
+
+/* 화면 아래 소방서 앞 거리(.fire-bg): 소방차는 26초마다 한 번 지나가고, 구름은 천천히 흐른다 */
+.fire-bg {
+  opacity: 0.85;
+}
+.fire-bg .truck {
+  animation: drive 26s linear infinite;
+}
+.fire-bg .cloud-a {
+  animation: drift 90s linear infinite;
+}
+.fire-bg .cloud-b {
+  animation: drift 130s linear -60s infinite;
+}
+@keyframes drive {
+  from {
+    transform: translateX(-40vw);
+  }
+  45%,
+  to {
+    transform: translateX(110vw);
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateX(-30vw);
+  }
+  to {
+    transform: translateX(105vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fire-bg .truck {
+    animation: none;
+    transform: translateX(50vw);
+  }
+  .fire-bg .cloud-a {
+    animation: none;
+    transform: translateX(30vw);
+  }
+  .fire-bg .cloud-b {
+    animation: none;
+    transform: translateX(65vw);
+  }
 }
 @keyframes flicker {
   to {

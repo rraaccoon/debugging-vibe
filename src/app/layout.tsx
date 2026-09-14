@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
+import { FireBackground } from "@/components/fire-background";
 
 const notoSansKR = Noto_Sans_KR({
   weight: ["400", "700", "900"],
@@ -26,7 +27,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className={notoSansKR.variable}>
-      <body className="min-h-dvh bg-paper text-ink antialiased">{children}</body>
+      <body className="min-h-dvh bg-paper text-ink antialiased">
+        <FireBackground />
+        {children}
+      </body>
     </html>
   );
 }

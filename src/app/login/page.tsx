@@ -13,7 +13,7 @@ export default async function LoginPage() {
   if (user) redirect(user.role === "shared" ? "/setup" : "/");
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4 py-12">
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4 py-12 pb-48 sm:pb-60">
       <div className="stagger">
         <div style={stagger(0)}>
           <BrandMark size="lg" ripple />

@@ -25,7 +25,7 @@ export default async function HomePage() {
               있어요.
             </p>
           </div>
-          <FireScene className="fire-scene w-full max-w-xs animate-reveal justify-self-center [animation-delay:140ms] sm:justify-self-end" />
+          <FireScene className="fire-anim w-full max-w-xs animate-reveal justify-self-center [animation-delay:140ms] sm:justify-self-end" />
         </section>
 
         {categories.length === 0 ? (
