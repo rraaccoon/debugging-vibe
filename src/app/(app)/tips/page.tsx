@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { BASICS, OVERUSE, POPULAR, TOOLS } from "@/content/tips";
+import {
+  BASICS,
+  ECOSYSTEM,
+  ECOSYSTEM_NOTE,
+  formatStars,
+  OVERUSE,
+  POPULAR,
+  STARS_UPDATED,
+  TOOLS,
+  WHICH_ONE,
+} from "@/content/tips";
 import { CopyButton } from "@/components/copy-button";
 import { PageTransition } from "@/components/page-transition";
 import { stagger } from "@/components/ui";
@@ -8,6 +18,8 @@ export const metadata: Metadata = { title: "정보 공유" };
 
 const PROMPT_BLOCK =
   "mt-2 -rotate-[0.4deg] whitespace-pre-wrap rounded-xl bg-mark px-4 py-3 font-sans text-sm leading-relaxed shadow-clay-sm";
+
+const CODE_BLOCK = "mt-2 overflow-x-auto whitespace-pre rounded-xl bg-ink px-4 py-3 font-sans text-[13px] leading-relaxed text-white";
 
 export default function TipsPage() {
   return (
@@ -78,6 +90,74 @@ export default function TipsPage() {
         </section>
 
         <section style={stagger(5)} className="mt-10">
+          <h2 className="font-display text-xl">넷 중 무엇을 쓰나 — 공식 문서 기준</h2>
+          <dl className="mt-3 divide-y divide-line">
+            {WHICH_ONE.map((w) => (
+              <div key={w.kind} className="grid gap-1 py-3 sm:grid-cols-[7rem_1fr]">
+                <dt className="font-bold text-action">{w.kind}</dt>
+                <dd>
+                  <p>{w.use}</p>
+                  <p className="text-sm text-ink-muted">{w.how}</p>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section style={stagger(6)} className="mt-10">
+          <h2 className="font-display text-xl">실제로 많이 쓰는 것 — 별 많은 순</h2>
+          <p className="mt-2 max-w-prose text-sm text-ink-muted">
+            {ECOSYSTEM_NOTE} <span className="whitespace-nowrap">(마지막 갱신 {STARS_UPDATED})</span>
+          </p>
+          <div className="mt-4 grid gap-3">
+            {ECOSYSTEM.map((g) => (
+              <article key={g.id} className="rounded-2xl border border-line bg-white p-5 shadow-clay-sm">
+                <h3 className="font-display text-lg leading-tight">{g.title}</h3>
+                <p className="mt-1 text-sm leading-relaxed">{g.definition}</p>
+
+                <p className="mt-3 rounded-xl bg-action-soft px-4 py-3 text-sm leading-relaxed">
+                  <span className="font-bold text-action">처음이면 이것 하나 </span>
+                  {g.firstPick}
+                </p>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <h4 className="text-sm font-bold">어디에 두고 어떻게 쓰나</h4>
+                  <CopyButton text={g.howTo} />
+                </div>
+                <pre className={CODE_BLOCK}>{g.howTo}</pre>
+
+                <details className="mt-3 text-sm">
+                  <summary className="font-bold text-ink-muted transition-colors hover:text-ink">
+                    별 많은 순으로 {g.items.length}개 보기
+                  </summary>
+                  <ol className="mt-2 divide-y divide-line">
+                    {[...g.items]
+                      .sort((a, b) => b.stars - a.stars)
+                      .map((it, i) => (
+                      <li key={it.name} className="grid gap-1 py-3 sm:grid-cols-[1.5rem_1fr]">
+                        <span className="text-sm font-bold tabular-nums text-ink-faint">{i + 1}</span>
+                        <div>
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="font-bold break-all">{it.name}</span>
+                            <span className="rounded-full bg-mark px-2 py-0.5 text-xs font-bold tabular-nums">
+                              ★ {formatStars(it.stars)}
+                            </span>
+                            {it.official && (
+                              <span className="rounded-full bg-action px-2 py-0.5 text-xs font-bold text-white">공식</span>
+                            )}
+                          </p>
+                          <p className="mt-1 leading-relaxed text-ink-muted">{it.what}</p>
+                        </div>
+                        </li>
+                      ))}
+                  </ol>
+                </details>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section style={stagger(7)} className="mt-10">
           <h2 className="font-display text-xl">요즘 많이 쓰는 것들</h2>
           <dl className="mt-3 divide-y divide-line">
             {POPULAR.map((p) => (

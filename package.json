@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node src/lib/auth.test.ts",
-    "user:add": "node --env-file=.env.local scripts/add-user.ts"
+    "test": "node src/lib/auth.test.ts && node src/content/tips.test.ts",
+    "user:add": "node --env-file=.env.local scripts/add-user.ts",
+    "stars:update": "node scripts/update-stars.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
