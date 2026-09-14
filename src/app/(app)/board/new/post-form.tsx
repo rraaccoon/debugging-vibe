@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createPost } from "@/lib/actions";
 import { BUTTON, INPUT } from "@/components/ui";
+import { PasteImages } from "@/components/paste-images";
 
 const FIELDS = [
   { name: "what_doing", label: "무엇을 하다가", hint: "어느 화면에서 무엇을 하려고 했나요" },
@@ -33,6 +34,7 @@ export function PostForm() {
           <textarea name={f.name} required rows={f.name === "actual" ? 5 : 2} className={INPUT} />
         </label>
       ))}
+      <PasteImages />
       {state?.error && (
         <p key={state.error} role="alert" className="animate-shake rounded-xl bg-danger-soft px-3.5 py-2.5 text-sm text-danger">
           {state.error}

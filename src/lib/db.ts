@@ -16,9 +16,21 @@ export type PostFields = {
   actual: string;
 };
 type Author = { author: string; authorRealName: string | null; authorRole: Role };
-export type PostSummary = Author & { id: number; title: string; createdAt: string; answerCount: number };
-export type Post = PostFields & Author & { id: number; createdAt: string };
-export type Answer = Author & { id: number; body: string; createdAt: string };
+/** 이모지 반응 — 같은 이모지를 누른 사람들을 묶는다. 순서는 처음 달린 순 */
+export type Reaction = { emoji: string; users: { id: number; name: string }[] };
+export type PostSummary = Author & {
+  id: number;
+  title: string;
+  createdAt: string;
+  answerCount: number;
+  reactions: { emoji: string; count: number }[];
+};
+export type Post = PostFields & Author & { id: number; createdAt: string; images: number[]; reactions: Reaction[] };
+export type Answer = Author & { id: number; body: string; createdAt: string; images: number[]; reactions: Reaction[] };
+/** 질문 또는 답에 붙인 스크린샷. 브라우저가 줄여 보낸 그대로 넣는다 */
+export type ImageInput = { mime: string; data: Buffer };
+/** 스크린샷 · 이모지가 붙는 곳 — 질문 아니면 답 */
+export type Target = { postId: number } | { answerId: number };
 
 let ready: Promise<void> | null = null;
 
@@ -63,6 +75,27 @@ async function createTables(): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS images (
+      id SERIAL PRIMARY KEY,
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      answer_id INTEGER REFERENCES answers(id) ON DELETE CASCADE,
+      mime TEXT NOT NULL,
+      data BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS reactions (
+      id SERIAL PRIMARY KEY,
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      answer_id INTEGER REFERENCES answers(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      emoji TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE NULLS NOT DISTINCT (post_id, answer_id, user_id, emoji)
+    )
+  `;
 }
 
 const iso = (v: unknown) => new Date(v as string).toISOString();
@@ -77,6 +110,16 @@ const toAuthor = (r: Record<string, unknown>): Author => ({
   authorRealName: (r.author_real_name as string | null) ?? null,
   authorRole: r.author_role as Role,
 });
+const groupReactions = (rows: Record<string, unknown>[]): Reaction[] => {
+  const byEmoji = new Map<string, Reaction>();
+  for (const r of rows) {
+    const emoji = r.emoji as string;
+    const g = byEmoji.get(emoji) ?? { emoji, users: [] };
+    g.users.push({ id: r.user_id as number, name: r.name as string });
+    byEmoji.set(emoji, g);
+  }
+  return [...byEmoji.values()];
+};
 
 /* ── 계정 ── */
 
@@ -116,19 +159,29 @@ export async function createStudent(name: string, passwordHash: string, realName
 
 export async function listPosts(): Promise<PostSummary[]> {
   await ensureSchema();
-  const rows = await sql`
-    SELECT p.id, p.title, p.created_at,
-      u.name AS author, u.real_name AS author_real_name, u.role AS author_role,
-      (SELECT count(*) FROM answers a WHERE a.post_id = p.id)::int AS answer_count
-    FROM posts p JOIN users u ON u.id = p.author_id
-    ORDER BY p.id DESC
-  `;
+  const [rows, reactions] = await Promise.all([
+    sql`
+      SELECT p.id, p.title, p.created_at,
+        u.name AS author, u.real_name AS author_real_name, u.role AS author_role,
+        (SELECT count(*) FROM answers a WHERE a.post_id = p.id)::int AS answer_count
+      FROM posts p JOIN users u ON u.id = p.author_id
+      ORDER BY p.id DESC
+    `,
+    sql`
+      SELECT post_id, emoji, count(*)::int AS count
+      FROM reactions WHERE post_id IS NOT NULL
+      GROUP BY post_id, emoji ORDER BY min(id) ASC
+    `,
+  ]);
   return rows.map((r) => ({
     ...toAuthor(r),
     id: r.id,
     title: r.title,
     createdAt: iso(r.created_at),
     answerCount: r.answer_count,
+    reactions: reactions
+      .filter((x) => x.post_id === r.id)
+      .map((x) => ({ emoji: x.emoji as string, count: x.count as number })),
   }));
 }
 
@@ -141,13 +194,31 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
     WHERE p.id = ${id}
   `;
   if (!p) return null;
-  const rows = await sql`
-    SELECT a.id, a.body, a.created_at,
-      u.name AS author, u.real_name AS author_real_name, u.role AS author_role
-    FROM answers a JOIN users u ON u.id = a.author_id
-    WHERE a.post_id = ${id}
-    ORDER BY a.id ASC
-  `;
+  const [rows, imgs, reacts] = await Promise.all([
+    sql`
+      SELECT a.id, a.body, a.created_at,
+        u.name AS author, u.real_name AS author_real_name, u.role AS author_role
+      FROM answers a JOIN users u ON u.id = a.author_id
+      WHERE a.post_id = ${id}
+      ORDER BY a.id ASC
+    `,
+    sql`
+      SELECT i.id, i.post_id, i.answer_id FROM images i
+      LEFT JOIN answers a ON a.id = i.answer_id
+      WHERE i.post_id = ${id} OR a.post_id = ${id}
+      ORDER BY i.id ASC
+    `,
+    sql`
+      SELECT r.post_id, r.answer_id, r.emoji, r.user_id, u.name
+      FROM reactions r JOIN users u ON u.id = r.user_id
+      LEFT JOIN answers a ON a.id = r.answer_id
+      WHERE r.post_id = ${id} OR a.post_id = ${id}
+      ORDER BY r.id ASC
+    `,
+  ]);
+  const imagesOf = (key: "post_id" | "answer_id", v: number) =>
+    imgs.filter((i) => i[key] === v).map((i) => i.id as number);
+  const reactionsOf = (key: "post_id" | "answer_id", v: number) => groupReactions(reacts.filter((r) => r[key] === v));
   return {
     post: {
       ...toAuthor(p),
@@ -159,12 +230,16 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
       expected: p.expected,
       actual: p.actual,
       createdAt: iso(p.created_at),
+      images: imagesOf("post_id", p.id),
+      reactions: reactionsOf("post_id", p.id),
     },
     answers: rows.map((a) => ({
       ...toAuthor(a),
       id: a.id,
       body: a.body,
       createdAt: iso(a.created_at),
+      images: imagesOf("answer_id", a.id),
+      reactions: reactionsOf("answer_id", a.id),
     })),
   };
 }
@@ -179,7 +254,50 @@ export async function createPost(authorId: number, f: PostFields): Promise<numbe
   return r.id;
 }
 
-export async function addAnswer(postId: number, authorId: number, body: string): Promise<void> {
+export async function addAnswer(postId: number, authorId: number, body: string): Promise<number> {
   await ensureSchema();
-  await sql`INSERT INTO answers (post_id, author_id, body) VALUES (${postId}, ${authorId}, ${body})`;
+  const [r] = await sql`
+    INSERT INTO answers (post_id, author_id, body) VALUES (${postId}, ${authorId}, ${body}) RETURNING id
+  `;
+  return r.id;
+}
+
+/* ── 스크린샷 ── */
+
+export async function addImages(target: Target, images: ImageInput[]): Promise<void> {
+  await ensureSchema();
+  const postId = "postId" in target ? target.postId : null;
+  const answerId = "answerId" in target ? target.answerId : null;
+  await Promise.all(
+    images.map(
+      (img) => sql`INSERT INTO images (post_id, answer_id, mime, data) VALUES (${postId}, ${answerId}, ${img.mime}, ${img.data})`,
+    ),
+  );
+}
+
+export async function getImage(id: number): Promise<ImageInput | null> {
+  await ensureSchema();
+  const [r] = await sql`SELECT mime, data FROM images WHERE id = ${id}`;
+  return r ? { mime: r.mime, data: r.data } : null;
+}
+
+/* ── 이모지 반응 ── */
+
+/** Slack 처럼 토글 — 이미 눌렀으면 빼고, 아니면 단다. DB 왕복 한 번으로 끝내려고 한 문장에 넣었다 */
+export async function toggleReaction(target: Target, userId: number, emoji: string): Promise<void> {
+  await ensureSchema();
+  const postId = "postId" in target ? target.postId : null;
+  const answerId = "answerId" in target ? target.answerId : null;
+  await sql`
+    WITH gone AS (
+      DELETE FROM reactions
+      WHERE post_id IS NOT DISTINCT FROM ${postId}::int AND answer_id IS NOT DISTINCT FROM ${answerId}::int
+        AND user_id = ${userId} AND emoji = ${emoji}
+      RETURNING id
+    )
+    INSERT INTO reactions (post_id, answer_id, user_id, emoji)
+    SELECT ${postId}::int, ${answerId}::int, ${userId}, ${emoji}
+    WHERE NOT EXISTS (SELECT 1 FROM gone)
+    ON CONFLICT DO NOTHING
+  `;
 }

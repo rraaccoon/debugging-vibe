@@ -6,6 +6,8 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import * as db from "@/lib/db";
+import { pickImages } from "@/lib/images";
+import { isEmoji } from "@/lib/emoji";
 import { createSession, deleteSession, getUser, requireUser } from "@/lib/session";
 
 export type FormState = { error?: string } | undefined;
@@ -84,7 +86,9 @@ export async function createPost(_prev: FormState, formData: FormData): Promise<
   if (Object.values(fields).some((v) => !v)) {
     return { error: "여섯 칸을 모두 채워 주세요. 답하는 사람이 상황을 그대로 볼 수 있어야 해요." };
   }
+  const images = await pickImages(formData);
   const id = await db.createPost(user.id, fields);
+  if (images.length) await db.addImages({ postId: id }, images);
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;
   notifySlack(`📩 새 질문 — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`);
@@ -96,6 +100,18 @@ export async function addAnswer(formData: FormData): Promise<void> {
   const postId = Number(formData.get("post_id"));
   const body = field(formData, "body");
   if (!Number.isInteger(postId) || !body) return;
-  await db.addAnswer(postId, user.id, body);
+  const images = await pickImages(formData);
+  const answerId = await db.addAnswer(postId, user.id, body);
+  if (images.length) await db.addImages({ answerId }, images);
+  revalidatePath(`/board/${postId}`);
+}
+
+/** Slack 처럼 이모지를 누르면 달리고 다시 누르면 빠진다. answerId 가 있으면 답에, 없으면 질문에 */
+export async function toggleReaction(input: { postId: number; answerId?: number; emoji: string }): Promise<void> {
+  const user = await requireUser();
+  const { postId, answerId, emoji } = input;
+  if (!Number.isInteger(postId) || !isEmoji(emoji)) return;
+  if (answerId !== undefined && !Number.isInteger(answerId)) return;
+  await db.toggleReaction(answerId === undefined ? { postId } : { answerId }, user.id, emoji);
   revalidatePath(`/board/${postId}`);
 }
