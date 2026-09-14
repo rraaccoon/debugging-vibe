@@ -1,8 +1,8 @@
-/** node src/content/tips.test.ts — 갱신 스크립트가 tips.ts 를 계속 읽고 고칠 수 있는지 확인한다 */
+/** node src/content/vibe/tips.test.ts — 갱신 스크립트가 tips.ts 를 계속 읽고 고칠 수 있는지 확인한다 */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { ECOSYSTEM, formatStars } from "./tips.ts";
-import { applyStars, REPO_RE } from "../../scripts/update-stars.ts";
+import { applyStars, REPO_RE } from "../../../scripts/update-stars.ts";
 
 const src = readFileSync(new URL("./tips.ts", import.meta.url), "utf8");
 const matched = [...src.matchAll(REPO_RE)].map((m) => m[2]);

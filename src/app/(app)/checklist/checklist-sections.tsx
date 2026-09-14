@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Checklist } from "@/content/checklists";
+import type { Checklist } from "@/content/types";
 import { stagger } from "@/components/ui";
 
 export function ChecklistSections({ lists }: { lists: Checklist[] }) {

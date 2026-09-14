@@ -7,6 +7,7 @@ import { authorLabel, formatDate } from "@/lib/format";
 import { PageTransition } from "@/components/page-transition";
 import { PasteImages } from "@/components/paste-images";
 import { Reactions } from "@/components/reactions";
+import { moduleLabel } from "@/content/modules";
 import { BUTTON, INPUT, stagger } from "@/components/ui";
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -39,6 +40,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         </Link>
         <p style={stagger(1)} className="mt-4">
           <span className="rounded-full bg-siren-soft px-2.5 py-0.5 text-xs font-bold text-siren">질문</span>
+          <span className="ml-1.5 rounded-full bg-mist px-2.5 py-0.5 text-xs font-bold text-ink-muted">{moduleLabel(post.module)}</span>
         </p>
         <h1 style={stagger(1)} className="mt-2 font-display text-3xl leading-tight">
           {post.title}

@@ -1,5 +1,5 @@
 /**
- * src/content/tips.ts 의 `stars:` 숫자를 GitHub 에서 다시 읽어 채운다.
+ * src/content/vibe/tips.ts 의 `stars:` 숫자를 GitHub 에서 다시 읽어 채운다.
  * 바꾸는 것은 숫자와 기준일뿐이다 — 설명 문장과 목록은 강사가 손으로 고친다.
  * 매일 08:30 (한국 시간) 에 .github/workflows/update-stars.yml 이 돌린다.
  *   실행: npm run stars:update
@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 /** tips.ts 안의 한 줄에서 저장소 이름과 별 수를 집는다 */
 export const REPO_RE = /(name: "([\w.\-]+\/[\w.\-]+)", stars: )(\d+)/g;
 
-const FILE = new URL("../src/content/tips.ts", import.meta.url);
+const FILE = new URL("../src/content/vibe/tips.ts", import.meta.url);
 
 /** 새 별 수와 기준일을 적어 넣는다. 네트워크와 분리해 두어야 시험할 수 있다 */
 export function applyStars(src: string, fresh: Map<string, number>, today: string) {

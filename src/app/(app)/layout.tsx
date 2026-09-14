@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/session";
+import { getModule } from "@/lib/module";
 import { logout } from "@/lib/actions";
 import { NavLinks } from "@/components/nav-links";
+import { ModuleTabs } from "@/components/module-tabs";
 import { BrandMark } from "@/components/brand-mark";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const user = await getUser();
+  const [user, mod] = await Promise.all([getUser(), getModule()]);
   if (!user) redirect("/login");
   if (user.role === "shared") redirect("/setup");
   return (
@@ -39,6 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </form>
           </div>
         </div>
+        <ModuleTabs current={mod} />
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
     </>

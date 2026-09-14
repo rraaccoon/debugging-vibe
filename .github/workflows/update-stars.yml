@@ -30,7 +30,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content/tips.ts
+          git add src/content/vibe/tips.ts
           if git diff --cached --quiet; then
             echo "변경 없음 — 커밋하지 않음"
           else

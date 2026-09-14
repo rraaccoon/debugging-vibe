@@ -1,4 +1,4 @@
-import type { Guide } from "@/content/guides";
+import type { Guide } from "@/content/types";
 import { CopyButton } from "./copy-button";
 
 export function GuideItem({ guide: g }: { guide: Guide }) {

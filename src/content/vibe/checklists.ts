@@ -1,11 +1,6 @@
 /** 점검 체크리스트 — 강사가 이 파일을 직접 고친다. */
 
-export type Checklist = {
-  id: string;
-  /** 언제 보는 목록인지 */
-  when: string;
-  items: string[];
-};
+import type { Checklist } from "../types";
 
 export const CHECKLISTS: Checklist[] = [
   {

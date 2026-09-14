@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node src/lib/auth.test.ts && node src/content/tips.test.ts && node src/lib/images.test.ts && node src/lib/emoji.test.ts",
+    "test": "node src/lib/auth.test.ts && node src/content/vibe/tips.test.ts && node src/lib/images.test.ts && node src/lib/emoji.test.ts",
     "user:add": "node --env-file=.env.local scripts/add-user.ts",
     "stars:update": "node scripts/update-stars.ts"
   },

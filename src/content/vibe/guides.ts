@@ -4,7 +4,9 @@
  * 프롬프트 안의 [대괄호]는 학생이 자기 상황으로 바꿔 넣는 자리다.
  */
 
-export const CATEGORIES = [
+import type { Category, Guide } from "../types";
+
+export const CATEGORIES: Category[] = [
   { slug: "start", title: "시작이 안 돼요", blurb: "npm이 안 되거나, 팀원 코드를 받았는데 내 컴퓨터에선 안 돌 때" },
   { slug: "build", title: "빌드 실패", blurb: "Vercel 빌드가 빨갛게 멈췄을 때" },
   { slug: "deploy", title: "배포", blurb: "빌드는 됐는데 열면 안 나오거나, 옛 버전이 보이거나, 사이트가 죽었을 때" },
@@ -15,22 +17,7 @@ export const CATEGORIES = [
   { slug: "ai", title: "AI가 이상하게 굴 때", blurb: "없는 걸 고쳤다고 하거나, 너무 많이 바꾸거나, 아까 말을 잊을 때" },
   { slug: "teamwork", title: "팀 작업", blurb: "같이 만들다 서로의 작업이 부딪힐 때" },
   { slug: "git", title: "git 합치기", blurb: "push가 거부되거나 CONFLICT가 났을 때" },
-] as const;
-
-export type Category = (typeof CATEGORIES)[number];
-
-export type Guide = {
-  id: string;
-  category: Category["title"];
-  /** 학생이 말하는 그대로의 증상 */
-  symptom: string;
-  /** 흔한 원인 — 한두 문장 */
-  cause: string;
-  /** 코드를 열지 않고도 학생이 직접 볼 수 있는 것 */
-  checkFirst: string[];
-  /** AI 도구에 붙여넣을 말 */
-  prompt: string;
-};
+];
 
 export const GUIDES: Guide[] = [
   /* ── 시작이 안 돼요 ── */

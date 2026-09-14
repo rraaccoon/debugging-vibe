@@ -2,26 +2,33 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
-import { CATEGORIES, GUIDES } from "@/content/guides";
+import { contentOf } from "@/content";
+import { getModule } from "@/lib/module";
 import { GuideItem } from "@/components/guide-item";
 import { PageTransition } from "@/components/page-transition";
 import { CHIP, stagger } from "@/components/ui";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const find = (slug: string) => CATEGORIES.find((c) => c.slug === slug);
+/** 헤더에서 고른 모듈의 유형 중에서 찾는다 — 다른 모듈의 유형이면 없는 것으로 본다 */
+async function find(slug: string) {
+  const { categories, guides } = contentOf(await getModule());
+  const category = categories.find((c) => c.slug === slug);
+  return category ? { category, categories, guides } : null;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  return { title: find(slug)?.title ?? "가이드" };
+  return { title: (await find(slug))?.category.title ?? "가이드" };
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = find(slug);
-  if (!category) notFound();
-  const items = GUIDES.filter((g) => g.category === category.title);
-  const others = CATEGORIES.filter((c) => c.slug !== slug);
+  const found = await find(slug);
+  if (!found) notFound();
+  const { category, categories, guides } = found;
+  const items = guides.filter((g) => g.category === category.title);
+  const others = categories.filter((c) => c.slug !== slug);
 
   return (
     <PageTransition>

@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import type { ModuleSlug } from "@/content/modules";
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error("DATABASE_URL 환경변수가 없습니다 (.env.local 과 Vercel 에 넣으세요)");
@@ -21,11 +22,15 @@ export type Reaction = { emoji: string; users: { id: number; name: string }[] };
 export type PostSummary = Author & {
   id: number;
   title: string;
+  module: ModuleSlug;
   createdAt: string;
   answerCount: number;
   reactions: { emoji: string; count: number }[];
 };
-export type Post = PostFields & Author & { id: number; createdAt: string; images: number[]; reactions: Reaction[] };
+export type Post = PostFields &
+  Author & { id: number; module: ModuleSlug; createdAt: string; images: number[]; reactions: Reaction[] };
+/** 질문 목록 한 쪽 크기 */
+export const PER_PAGE = 20;
 export type Answer = Author & { id: number; body: string; createdAt: string; images: number[]; reactions: Reaction[] };
 /** 질문 또는 답에 붙인 스크린샷. 브라우저가 줄여 보낸 그대로 넣는다 */
 export type ImageInput = { mime: string; data: Buffer };
@@ -66,6 +71,8 @@ async function createTables(): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+  // 수업 모듈(content/modules.ts 의 slug). 모듈이 생기기 전 글은 전부 바이브 코딩
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS module TEXT NOT NULL DEFAULT 'vibe'`;
   await sql`
     CREATE TABLE IF NOT EXISTS answers (
       id SERIAL PRIMARY KEY,
@@ -157,38 +164,52 @@ export async function createStudent(name: string, passwordHash: string, realName
 
 /* ── 질문 ── */
 
-export async function listPosts(): Promise<PostSummary[]> {
+/** module 이 null 이면 모든 모듈. page 는 1부터 */
+export async function listPosts(opts: {
+  module: ModuleSlug | null;
+  page: number;
+}): Promise<{ posts: PostSummary[]; total: number }> {
   await ensureSchema();
-  const [rows, reactions] = await Promise.all([
+  const m = opts.module;
+  const offset = (opts.page - 1) * PER_PAGE;
+  const [rows, reactions, [{ total }]] = await Promise.all([
     sql`
-      SELECT p.id, p.title, p.created_at,
+      SELECT p.id, p.title, p.module, p.created_at,
         u.name AS author, u.real_name AS author_real_name, u.role AS author_role,
         (SELECT count(*) FROM answers a WHERE a.post_id = p.id)::int AS answer_count
       FROM posts p JOIN users u ON u.id = p.author_id
+      WHERE ${m}::text IS NULL OR p.module = ${m}
       ORDER BY p.id DESC
+      LIMIT ${PER_PAGE} OFFSET ${offset}
     `,
     sql`
       SELECT post_id, emoji, count(*)::int AS count
-      FROM reactions WHERE post_id IS NOT NULL
+      FROM reactions
+      WHERE post_id IN (
+        SELECT id FROM posts WHERE ${m}::text IS NULL OR module = ${m} ORDER BY id DESC LIMIT ${PER_PAGE} OFFSET ${offset}
+      )
       GROUP BY post_id, emoji ORDER BY min(id) ASC
     `,
+    sql`SELECT count(*)::int AS total FROM posts WHERE ${m}::text IS NULL OR module = ${m}`,
   ]);
-  return rows.map((r) => ({
+  const posts = rows.map((r) => ({
     ...toAuthor(r),
     id: r.id,
     title: r.title,
+    module: r.module,
     createdAt: iso(r.created_at),
     answerCount: r.answer_count,
     reactions: reactions
       .filter((x) => x.post_id === r.id)
       .map((x) => ({ emoji: x.emoji as string, count: x.count as number })),
   }));
+  return { posts, total };
 }
 
 export async function getPost(id: number): Promise<{ post: Post; answers: Answer[] } | null> {
   await ensureSchema();
   const [p] = await sql`
-    SELECT p.id, p.title, p.what_doing, p.when_happened, p.how_did, p.expected, p.actual, p.created_at,
+    SELECT p.id, p.title, p.module, p.what_doing, p.when_happened, p.how_did, p.expected, p.actual, p.created_at,
       u.name AS author, u.real_name AS author_real_name, u.role AS author_role
     FROM posts p JOIN users u ON u.id = p.author_id
     WHERE p.id = ${id}
@@ -224,6 +245,7 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
       ...toAuthor(p),
       id: p.id,
       title: p.title,
+      module: p.module,
       whatDoing: p.what_doing,
       whenHappened: p.when_happened,
       howDid: p.how_did,
@@ -244,11 +266,11 @@ export async function getPost(id: number): Promise<{ post: Post; answers: Answer
   };
 }
 
-export async function createPost(authorId: number, f: PostFields): Promise<number> {
+export async function createPost(authorId: number, f: PostFields, module: ModuleSlug): Promise<number> {
   await ensureSchema();
   const [r] = await sql`
-    INSERT INTO posts (author_id, title, what_doing, when_happened, how_did, expected, actual)
-    VALUES (${authorId}, ${f.title}, ${f.whatDoing}, ${f.whenHappened}, ${f.howDid}, ${f.expected}, ${f.actual})
+    INSERT INTO posts (author_id, module, title, what_doing, when_happened, how_did, expected, actual)
+    VALUES (${authorId}, ${module}, ${f.title}, ${f.whatDoing}, ${f.whenHappened}, ${f.howDid}, ${f.expected}, ${f.actual})
     RETURNING id
   `;
   return r.id;

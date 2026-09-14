@@ -1,0 +1,174 @@
+import {
+  BASICS,
+  ECOSYSTEM,
+  ECOSYSTEM_NOTE,
+  formatStars,
+  OVERUSE,
+  POPULAR,
+  STARS_UPDATED,
+  TOOLS,
+  WHICH_ONE,
+} from "@/content/vibe/tips";
+import { CopyButton } from "@/components/copy-button";
+import { PageTransition } from "@/components/page-transition";
+import { stagger } from "@/components/ui";
+
+const PROMPT_BLOCK =
+  "mt-2 -rotate-[0.4deg] whitespace-pre-wrap rounded-xl bg-mark px-4 py-3 font-sans text-sm leading-relaxed shadow-clay-sm";
+
+const LINK = "text-action underline decoration-action/30 underline-offset-2 transition-colors hover:decoration-action";
+
+const CODE_BLOCK = "mt-2 overflow-x-auto whitespace-pre rounded-xl bg-ink px-4 py-3 font-sans text-[13px] leading-relaxed text-white";
+
+/** 바이브 코딩(M1) 정보 공유 — 이 모듈에 맞춘 고정 구성. 다른 모듈은 tips/page.tsx 가 content 묶음을 보여 준다 */
+export function VibeTips() {
+  return (
+    <PageTransition>
+      <div className="stagger">
+        <h1 style={stagger(0)} className="font-display text-3xl leading-tight sm:text-4xl">
+          AI를 <span className="marker">잘 쓰는</span> 법
+        </h1>
+        <p style={stagger(1)} className="mt-3 max-w-prose text-ink-muted">
+          스킬 · 훅 · 에이전트 같은 말이 무엇인지, 언제 쓰고 언제 쓰면 안 되는지. 이 수업 기준으로 정리했어요.
+        </p>
+
+        <section style={stagger(2)} className="mt-10">
+          <h2 className="font-display text-xl">먼저 이것부터 — 도구보다 습관</h2>
+          <ul className="mt-3 divide-y divide-line">
+            {BASICS.map((b) => (
+              <li key={b} className="flex items-start gap-3 py-3">
+                <span className="mt-2 size-2 shrink-0 rounded-full bg-action" aria-hidden="true" />
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section style={stagger(3)} className="mt-10 rounded-2xl border border-siren/30 bg-siren-soft p-5 sm:p-6">
+          <h2 className="font-display text-xl text-siren-deep">{OVERUSE.title}</h2>
+          <p className="mt-2 max-w-prose">{OVERUSE.intro}</p>
+          <ul className="mt-3 list-disc pl-5 leading-relaxed">
+            {OVERUSE.reasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+          <p className="mt-4 rounded-xl bg-white/80 px-4 py-3 text-sm font-bold leading-relaxed">{OVERUSE.ruleOfThumb}</p>
+          <div className="mt-5 flex items-center justify-between gap-3">
+            <h3 className="text-sm font-bold">도구가 원인인지 확인하는 프롬프트</h3>
+            <CopyButton text={OVERUSE.prompt} />
+          </div>
+          <pre className={PROMPT_BLOCK}>{OVERUSE.prompt}</pre>
+        </section>
+
+        <section style={stagger(4)} className="mt-10">
+          <h2 className="font-display text-xl">도구 다섯 가지 — 무엇 · 언제 · 주의</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {TOOLS.map((t) => (
+              <article key={t.id} className="flex flex-col gap-2 rounded-2xl border border-line bg-white p-5 shadow-clay-sm">
+                <h3 className="font-display text-lg leading-tight">{t.title}</h3>
+                <p className="text-sm leading-relaxed">{t.what}</p>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-bold text-action">언제 </span>
+                  {t.when}
+                </p>
+                <p className="text-sm leading-relaxed">
+                  <span className="font-bold text-siren-deep">주의 </span>
+                  {t.caution}
+                </p>
+                {t.example && (
+                  <details className="mt-1 text-sm">
+                    <summary className="font-bold text-ink-muted transition-colors hover:text-ink">써 볼 프롬프트</summary>
+                    <div className="mt-2 flex justify-end">
+                      <CopyButton text={t.example} />
+                    </div>
+                    <pre className={PROMPT_BLOCK}>{t.example}</pre>
+                  </details>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section style={stagger(5)} className="mt-10">
+          <h2 className="font-display text-xl">넷 중 무엇을 쓰나 — 공식 문서 기준</h2>
+          <dl className="mt-3 divide-y divide-line">
+            {WHICH_ONE.map((w) => (
+              <div key={w.kind} className="grid gap-1 py-3 sm:grid-cols-[7rem_1fr]">
+                <dt className="font-bold text-action">{w.kind}</dt>
+                <dd>
+                  <p>{w.use}</p>
+                  <p className="text-sm text-ink-muted">{w.how}</p>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section style={stagger(6)} className="mt-10">
+          <h2 className="font-display text-xl">실제로 많이 쓰는 것 — 별 많은 순</h2>
+          <p className="mt-2 max-w-prose text-sm text-ink-muted">
+            {ECOSYSTEM_NOTE} <span className="whitespace-nowrap">(마지막 갱신 {STARS_UPDATED})</span>
+          </p>
+          <div className="mt-4 grid gap-3">
+            {ECOSYSTEM.map((g) => (
+              <article key={g.id} className="rounded-2xl border border-line bg-white p-5 shadow-clay-sm">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <h3 className="font-display text-lg leading-tight">{g.title}</h3>
+                  <a className={`shrink-0 text-sm ${LINK}`} href={g.docs} target="_blank" rel="noopener noreferrer">
+                    공식 문서 ↗
+                  </a>
+                </div>
+                <p className="mt-1 text-sm leading-relaxed">{g.definition}</p>
+
+                <p className="mt-3 rounded-xl bg-action-soft px-4 py-3 text-sm leading-relaxed">
+                  <span className="font-bold text-action">처음이면 이것 하나 </span>
+                  {g.firstPick}
+                </p>
+
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <h4 className="text-sm font-bold">어디에 두고 어떻게 쓰나</h4>
+                  <CopyButton text={g.howTo} />
+                </div>
+                <pre className={CODE_BLOCK}>{g.howTo}</pre>
+
+                <details className="mt-3 text-sm">
+                  <summary className="font-bold text-ink-muted transition-colors hover:text-ink">
+                    별 많은 순으로 {g.items.length}개 보기
+                  </summary>
+                  <ol className="mt-2 divide-y divide-line">
+                    {[...g.items]
+                      .sort((a, b) => b.stars - a.stars)
+                      .map((it, i) => (
+                      <li key={it.name} className="grid gap-1 py-3 sm:grid-cols-[1.5rem_1fr]">
+                        <span className="text-sm font-bold tabular-nums text-ink-faint">{i + 1}</span>
+                        <div>
+                          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <a
+                              className={`font-bold break-all ${LINK}`}
+                              href={`https://github.com/${it.name}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {it.name} ↗
+                            </a>
+                            <span className="rounded-full bg-mark px-2 py-0.5 text-xs font-bold tabular-nums">
+                              ★ {formatStars(it.stars)}
+                            </span>
+                            {it.official && (
+                              <span className="rounded-full bg-action px-2 py-0.5 text-xs font-bold text-white">공식</span>
+                            )}
+                          </p>
+                          <p className="mt-1 leading-relaxed text-ink-muted">{it.what}</p>
+                        </div>
+                        </li>
+                      ))}
+                  </ol>
+                </details>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </PageTransition>
+  );
+}

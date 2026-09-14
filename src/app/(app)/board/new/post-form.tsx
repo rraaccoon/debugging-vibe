@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { createPost } from "@/lib/actions";
-import { BUTTON, INPUT } from "@/components/ui";
+import { MODULES, type ModuleSlug } from "@/content/modules";
+import { BUTTON, CHIP, INPUT } from "@/components/ui";
 import { PasteImages } from "@/components/paste-images";
 
 const FIELDS = [
@@ -13,10 +14,25 @@ const FIELDS = [
   { name: "actual", label: "실제 값", hint: "실제로 보인 것. 에러 문구는 그대로 붙여넣기" },
 ];
 
-export function PostForm() {
+export function PostForm({ defaultModule }: { defaultModule: ModuleSlug }) {
   const [state, action, pending] = useActionState(createPost, undefined);
   return (
     <form action={action} className="mt-8 flex flex-col gap-5 rounded-2xl border border-line bg-white p-5 shadow-clay sm:p-6">
+      <fieldset className="flex flex-col gap-1 text-sm font-bold">
+        <legend>어느 모듈 질문인가요</legend>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {MODULES.map((m) => (
+            <label key={m.slug} className="cursor-pointer">
+              <input type="radio" name="module" value={m.slug} defaultChecked={m.slug === defaultModule} className="peer sr-only" />
+              <span
+                className={`${CHIP} inline-block font-normal peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-checked:hover:text-white peer-focus-visible:ring-4 peer-focus-visible:ring-action/15`}
+              >
+                {m.short} {m.name}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <label className="flex flex-col gap-1 text-sm font-bold">
         증상을 한 줄로
         <input

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getModule } from "@/lib/module";
 import { PageTransition } from "@/components/page-transition";
 import { stagger } from "@/components/ui";
 import { PostForm } from "./post-form";
 
 export const metadata: Metadata = { title: "질문 올리기" };
 
-export default function NewPostPage() {
+export default async function NewPostPage() {
+  const mod = await getModule();
   return (
     <PageTransition>
       <div className="stagger">
@@ -26,7 +28,7 @@ export default function NewPostPage() {
           붙여넣으세요.
         </p>
         <div style={stagger(3)}>
-          <PostForm />
+          <PostForm defaultModule={mod} />
         </div>
       </div>
     </PageTransition>

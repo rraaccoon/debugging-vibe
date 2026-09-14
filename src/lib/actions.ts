@@ -2,12 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { after } from "next/server";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import * as db from "@/lib/db";
 import { pickImages } from "@/lib/images";
 import { isEmoji } from "@/lib/emoji";
+import { getModule, MODULE_COOKIE } from "@/lib/module";
+import { isModuleSlug, moduleLabel } from "@/content/modules";
 import { createSession, deleteSession, getUser, requireUser } from "@/lib/session";
 
 export type FormState = { error?: string } | undefined;
@@ -86,12 +88,16 @@ export async function createPost(_prev: FormState, formData: FormData): Promise<
   if (Object.values(fields).some((v) => !v)) {
     return { error: "여섯 칸을 모두 채워 주세요. 답하는 사람이 상황을 그대로 볼 수 있어야 해요." };
   }
+  const picked = field(formData, "module");
+  const mod = isModuleSlug(picked) ? picked : await getModule();
   const images = await pickImages(formData);
-  const id = await db.createPost(user.id, fields);
+  const id = await db.createPost(user.id, fields, mod);
   if (images.length) await db.addImages({ postId: id }, images);
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;
-  notifySlack(`📩 새 질문 — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`);
+  notifySlack(
+    `📩 새 질문 · ${slackEscape(moduleLabel(mod))} — ${slackEscape(user.name)}\n<${origin}/board/${id}|${slackEscape(fields.title)}>`,
+  );
   redirect(`/board/${id}`);
 }
 
@@ -114,4 +120,15 @@ export async function toggleReaction(input: { postId: number; answerId?: number;
   if (answerId !== undefined && !Number.isInteger(answerId)) return;
   await db.toggleReaction(answerId === undefined ? { postId } : { answerId }, user.id, emoji);
   revalidatePath(`/board/${postId}`);
+}
+
+/** 헤더 모듈 탭 — 고른 모듈을 쿠키에 두고 지금 화면을 다시 그린다. 가이드 상세는 다른 모듈에 없을 수 있어 홈으로 */
+export async function setModule(formData: FormData): Promise<void> {
+  const mod = field(formData, "module");
+  if (!isModuleSlug(mod)) return;
+  (await cookies()).set(MODULE_COOKIE, mod, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  const from = (await headers()).get("referer");
+  const path = from && URL.canParse(from) ? new URL(from).pathname : "/";
+  if (path.startsWith("/guide/")) redirect("/");
+  revalidatePath("/", "layout");
 }
