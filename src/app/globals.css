@@ -146,27 +146,15 @@
   animation: beacon 1000ms steps(1) infinite;
 }
 
-/* 화면 아래 소방서 앞 거리(.fire-bg): 소방차는 26초마다 한 번 지나가고, 구름은 천천히 흐른다 */
+/* 화면 아래 소방서 앞 거리(.fire-bg): 소방차는 가운데 서 있고, 구름은 천천히 흐른다 */
 .fire-bg {
   opacity: 0.85;
-}
-.fire-bg .truck {
-  animation: drive 26s linear infinite;
 }
 .fire-bg .cloud-a {
   animation: drift 90s linear infinite;
 }
 .fire-bg .cloud-b {
   animation: drift 130s linear -60s infinite;
-}
-@keyframes drive {
-  from {
-    transform: translateX(-40vw);
-  }
-  45%,
-  to {
-    transform: translateX(110vw);
-  }
 }
 @keyframes drift {
   from {
@@ -177,10 +165,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fire-bg .truck {
-    animation: none;
-    transform: translateX(50vw);
-  }
   .fire-bg .cloud-a {
     animation: none;
     transform: translateX(30vw);

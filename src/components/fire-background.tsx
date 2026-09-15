@@ -2,8 +2,8 @@ import { FireTruck, FlameShape } from "@/components/art";
 
 /**
  * 화면 아래에 고정된 소방서 앞 거리. 글 뒤에 깔리는 장식이라 pointer-events 없고 aria-hidden.
- * 소방서 · 소화전 · 호스를 든 소방관은 서 있고, 소방차는 이따금 지나가며, 구름은 천천히 흐른다 (globals.css .fire-bg).
- * 움직임 줄이기 설정이면 소방차는 가운데에 세워 두고 구름은 멈춘다.
+ * 소방서 · 소화전 · 호스를 든 소방관 · 소방차는 서 있고, 구름만 천천히 흐른다 (globals.css .fire-bg).
+ * 움직임 줄이기 설정이면 구름도 멈춘다.
  */
 export function FireBackground() {
   return (
@@ -75,8 +75,8 @@ export function FireBackground() {
         <rect x="152" y="106" width="16" height="6" rx="2" fill="var(--color-ink)" />
       </svg>
 
-      {/* 달리는 소방차 */}
-      <FireTruck className="truck absolute bottom-1.5 left-0 w-36 sm:w-44" />
+      {/* 서 있는 소방차 */}
+      <FireTruck className="absolute bottom-1.5 left-1/2 w-36 sm:w-44" />
 
       {/* 거리 */}
       <div className="absolute inset-x-0 bottom-0 h-2 bg-line" />

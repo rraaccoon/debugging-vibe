@@ -77,7 +77,7 @@ export function FireScene({ className = "" }: { className?: string }) {
   );
 }
 
-/** 소방차만 (배경에서 달린다) */
+/** 소방차만 (배경에 서 있다) */
 export function FireTruck({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="94 20 208 94" className={className} aria-hidden="true" focusable="false">
