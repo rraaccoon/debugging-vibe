@@ -171,12 +171,12 @@ github.com/anthropics/skills`,
     firstPick:
       "공식 저장소의 frontend-design 하나. 화면이 \"AI 가 만든 티\" 나는 것을 줄여 준다. 문서 다루는 docx · pdf · pptx · xlsx 네 개도 공식이라 믿을 만하다.",
     items: [
-      { name: "obra/superpowers", stars: 290224, what: "스킬 + 일하는 방식(테스트 먼저 쓰기 · 차근차근 디버깅 · 계획 세우고 실행)을 묶어 놓았다. Claude Code 말고 Cursor · Copilot 에도 쓴다." },
-      { name: "mattpocock/skills", stars: 267871, what: "현업 개발자 한 명이 실제로 쓰는 스킬 폴더를 그대로 공개한 것. 일반 개발 작업용." },
-      { name: "anthropics/skills", stars: 177659, official: true, what: "Anthropic 공식 19개. frontend-design · canvas-design · docx · pdf · pptx · xlsx · webapp-testing · skill-creator · mcp-builder 등." },
-      { name: "addyosmani/agent-skills", stars: 98473, what: "실무용 엔지니어링 스킬 모음." },
-      { name: "ComposioHQ/awesome-claude-skills", stars: 75499, what: "스킬을 모아 놓은 목록. 뭐가 있는지 훑을 때." },
-      { name: "VoltAgent/awesome-agent-skills", stars: 34748, what: "1000개 넘는 스킬 색인. Claude · Codex · Gemini · Cursor 것을 같이 모았다." },
+      { name: "obra/superpowers", stars: 290691, what: "스킬 + 일하는 방식(테스트 먼저 쓰기 · 차근차근 디버깅 · 계획 세우고 실행)을 묶어 놓았다. Claude Code 말고 Cursor · Copilot 에도 쓴다." },
+      { name: "mattpocock/skills", stars: 268510, what: "현업 개발자 한 명이 실제로 쓰는 스킬 폴더를 그대로 공개한 것. 일반 개발 작업용." },
+      { name: "anthropics/skills", stars: 177832, official: true, what: "Anthropic 공식 19개. frontend-design · canvas-design · docx · pdf · pptx · xlsx · webapp-testing · skill-creator · mcp-builder 등." },
+      { name: "addyosmani/agent-skills", stars: 98719, what: "실무용 엔지니어링 스킬 모음." },
+      { name: "ComposioHQ/awesome-claude-skills", stars: 75557, what: "스킬을 모아 놓은 목록. 뭐가 있는지 훑을 때." },
+      { name: "VoltAgent/awesome-agent-skills", stars: 34784, what: "1000개 넘는 스킬 색인. Claude · Codex · Gemini · Cursor 것을 같이 모았다." },
     ],
   },
   {
@@ -196,12 +196,12 @@ github.com/anthropics/skills`,
     firstPick:
       "code-reviewer 하나. 어느 목록을 봐도 1등이고, 설정에 10분이면 된다. 받기 전에 먼저 확인할 것 — Claude Code 에는 Explore · Plan · general-purpose 가 이미 기본으로 들어 있다.",
     items: [
-      { name: "wshobson/agents", stars: 39883, what: "가장 큰 묶음. 에이전트 202개 · 스킬 183개 · 명령 105개. 필요한 것만 골라 쓴다." },
-      { name: "VoltAgent/awesome-claude-code-subagents", stars: 25269, what: "154개를 10개 분야로 정리했다. 언어별 · 인프라 · 품질/보안 · 데이터 등." },
-      { name: "contains-studio/agents", stars: 12419, what: "어느 스튜디오가 실제로 쓰던 것. 다만 2025년 7월 이후 멈춰 있다 — 참고만." },
-      { name: "VoltAgent/awesome-codex-subagents", stars: 6223, what: "Codex 쪽 130여 개. 내용은 대체로 그대로 가져다 쓸 수 있다." },
+      { name: "wshobson/agents", stars: 39912, what: "가장 큰 묶음. 에이전트 202개 · 스킬 183개 · 명령 105개. 필요한 것만 골라 쓴다." },
+      { name: "VoltAgent/awesome-claude-code-subagents", stars: 25287, what: "154개를 10개 분야로 정리했다. 언어별 · 인프라 · 품질/보안 · 데이터 등." },
+      { name: "contains-studio/agents", stars: 12420, what: "어느 스튜디오가 실제로 쓰던 것. 다만 2025년 7월 이후 멈춰 있다 — 참고만." },
+      { name: "VoltAgent/awesome-codex-subagents", stars: 6231, what: "Codex 쪽 130여 개. 내용은 대체로 그대로 가져다 쓸 수 있다." },
       { name: "Doriandarko/maestro", stars: 4359, what: "에이전트 여러 개를 지휘하는 방식. 초보 팀에는 이르다." },
-      { name: "0xfurai/claude-code-subagents", stars: 1005, what: "개발용 100여 개. 2025년 10월 이후 멈춰 있다." },
+      { name: "0xfurai/claude-code-subagents", stars: 1006, what: "개발용 100여 개. 2025년 10월 이후 멈춰 있다." },
     ],
   },
   {
@@ -220,12 +220,12 @@ github.com/anthropics/skills`,
     firstPick:
       "공식 마켓의 code-review 또는 pr-review-toolkit. 합치기 전에 변경을 훑어 준다. 공식 39개 중 12개가 언어별 코드 분석(LSP)이다 — 쓰는 언어 것 하나는 켜 둘 만하다.",
     items: [
-      { name: "obra/superpowers", stars: 290224, what: "스킬 묶음이자 가장 큰 플러그인 배포처." },
-      { name: "hesreallyhim/awesome-claude-code", stars: 54453, what: "이 바닥 대표 목록. 스킬 · 에이전트 · 플러그인 · 도구를 한자리에." },
-      { name: "anthropics/claude-plugins-official", stars: 36633, official: true, what: "Anthropic 공식 마켓 39개. github · linear · notion · figma · vercel · supabase · sentry 연결과 언어별 LSP." },
-      { name: "alirezarezvani/claude-skills", stars: 26265, what: "스킬 380개 · 에이전트 30개 · 명령 70개를 마켓 하나로." },
-      { name: "anthropics/claude-plugins-community", stars: 4391, official: true, what: "커뮤니티 플러그인을 Anthropic 이 읽기 전용으로 모아 둔 곳." },
-      { name: "trailofbits/skills-curated", stars: 505, what: "별은 적지만 보안 회사가 하나씩 검토한 것만 올린다. 남이 만든 것을 쓸 거면 여기부터." },
+      { name: "obra/superpowers", stars: 290691, what: "스킬 묶음이자 가장 큰 플러그인 배포처." },
+      { name: "hesreallyhim/awesome-claude-code", stars: 54516, what: "이 바닥 대표 목록. 스킬 · 에이전트 · 플러그인 · 도구를 한자리에." },
+      { name: "anthropics/claude-plugins-official", stars: 36666, official: true, what: "Anthropic 공식 마켓 39개. github · linear · notion · figma · vercel · supabase · sentry 연결과 언어별 LSP." },
+      { name: "alirezarezvani/claude-skills", stars: 26345, what: "스킬 380개 · 에이전트 30개 · 명령 70개를 마켓 하나로." },
+      { name: "anthropics/claude-plugins-community", stars: 4407, official: true, what: "커뮤니티 플러그인을 Anthropic 이 읽기 전용으로 모아 둔 곳." },
+      { name: "trailofbits/skills-curated", stars: 504, what: "별은 적지만 보안 회사가 하나씩 검토한 것만 올린다. 남이 만든 것을 쓸 거면 여기부터." },
     ],
   },
   {
@@ -244,21 +244,21 @@ claude mcp list`,
     firstPick:
       "Context7 하나부터. AI 가 옛 버전 문법으로 코드를 쓰는 것을 줄여 준다. 그다음이 Playwright — AI 가 화면을 직접 열어 눌러 보게 한다. 이 수업은 이 둘을 쓴다.",
     items: [
-      { name: "punkpeye/awesome-mcp-servers", stars: 95441, what: "가장 큰 MCP 목록. 뭐가 있는지 찾을 때." },
-      { name: "modelcontextprotocol/servers", stars: 90555, official: true, what: "공식 기본 7개 — Everything · Fetch · Filesystem · Git · Memory · Sequential Thinking · Time. Filesystem 이 가장 많이 깔린다." },
-      { name: "upstash/context7", stars: 62340, what: "라이브러리 최신 문서를 AI 에게 읽힌다. 지어내기와 옛 문법을 줄인다." },
-      { name: "ChromeDevTools/chrome-devtools-mcp", stars: 52488, what: "크롬 개발자 도구를 AI 에게. 네트워크 · 콘솔 · 성능까지 본다." },
-      { name: "microsoft/playwright-mcp", stars: 37484, what: "AI 가 브라우저를 열어 눌러 보고 확인한다. \"다 됐다\"는 말을 안 믿어도 된다." },
-      { name: "github/github-mcp-server", stars: 33133, official: true, what: "GitHub 공식. 이슈 · PR · 커밋 · CI 를 다룬다." },
-      { name: "oraios/serena", stars: 29725, what: "코드 뜻으로 찾아 고친다. 파일이 많아졌을 때." },
-      { name: "GLips/Figma-Context-MCP", stars: 15894, what: "피그마 시안을 코드 쪽으로 읽어 온다." },
+      { name: "punkpeye/awesome-mcp-servers", stars: 95470, what: "가장 큰 MCP 목록. 뭐가 있는지 찾을 때." },
+      { name: "modelcontextprotocol/servers", stars: 90568, official: true, what: "공식 기본 7개 — Everything · Fetch · Filesystem · Git · Memory · Sequential Thinking · Time. Filesystem 이 가장 많이 깔린다." },
+      { name: "upstash/context7", stars: 62371, what: "라이브러리 최신 문서를 AI 에게 읽힌다. 지어내기와 옛 문법을 줄인다." },
+      { name: "ChromeDevTools/chrome-devtools-mcp", stars: 52529, what: "크롬 개발자 도구를 AI 에게. 네트워크 · 콘솔 · 성능까지 본다." },
+      { name: "microsoft/playwright-mcp", stars: 37521, what: "AI 가 브라우저를 열어 눌러 보고 확인한다. \"다 됐다\"는 말을 안 믿어도 된다." },
+      { name: "github/github-mcp-server", stars: 33156, official: true, what: "GitHub 공식. 이슈 · PR · 커밋 · CI 를 다룬다." },
+      { name: "oraios/serena", stars: 29754, what: "코드 뜻으로 찾아 고친다. 파일이 많아졌을 때." },
+      { name: "GLips/Figma-Context-MCP", stars: 15901, what: "피그마 시안을 코드 쪽으로 읽어 온다." },
       { name: "makenotion/notion-mcp-server", stars: 4644, what: "노션 공식. 기획 문서를 노션에 둔다면." },
     ],
   },
 ];
 
 /** 별 수를 마지막으로 읽어 온 날 — scripts/update-stars.ts 가 고친다 */
-export const STARS_UPDATED = "2026-09-23";
+export const STARS_UPDATED = "2026-09-24";
 
 export const ECOSYSTEM_NOTE =
   "별 수는 매일 아침 GitHub 에서 자동으로 다시 읽어 옵니다. 숫자보다 순서를 보세요. 별이 많다고 우리 프로젝트에 맞는 것은 아닙니다 — 남이 만든 것은 내용을 읽고 나서 씁니다.";
